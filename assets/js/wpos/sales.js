@@ -208,11 +208,11 @@ function WPOSItems() {
         // check if a priced item is already present in the sale and if so increment it's qty
         if (item.price==""){
             // insert item into table
-            addItemRow(1, item.name, item.price, item.taxid, item.id, {desc:item.description, cost:item.cost, unit_original:item.price, alt_name:item.alt_name});
+            addItemRow(1, item.name, item.price, item.taxid, item.id, {desc:item.description, hsncode:item.hsncode, cost:item.cost, unit_original:item.price, alt_name:item.alt_name});
         } else {
             if (!isItemAdded(item.id, true)){
                 // insert item into table
-                addItemRow(1, item.name, item.price, item.taxid, item.id, {desc:item.description, cost:item.cost, unit_original:item.price, alt_name:item.alt_name});
+                addItemRow(1, item.name, item.price, item.taxid, item.id, {desc:item.description, hsncode:item.hsncode, cost:item.cost, unit_original:item.price, alt_name:item.alt_name});
             }
         }
         $("#codeinput").val('');
@@ -411,6 +411,8 @@ function WPOSItems() {
         if (custdata!=null){
             $("#custid").val(custdata.id);
             $("#custname").val(custdata.name);
+            $("#custgstin").val(custdata.gstin);
+            $("#custstatecode").val(custdata.statecode);
             //$("#custemail").val(custdata.email);
             $("#custphone").val(custdata.phone);
             $("#custmobile").val(custdata.mobile);
@@ -1029,6 +1031,8 @@ function WPOSSales() {
             if (salesobj.hasOwnProperty("custdata") && typeof salesobj.custdata =="object"){
                 var custdata = salesobj.custdata;
                 $("#custname").val(custdata.name);
+                $("#custgstin").val(custdata.gstin);
+                $("#custstatecode").val(custdata.statecode);
                 $("#custphone").val(custdata.phone);
                 $("#custmobile").val(custdata.mobile);
                 $("#custaddress").val(custdata.address);
@@ -1231,6 +1235,7 @@ function WPOSSales() {
                 for (var x in itemdata) {
                     data[x] = itemdata[x];
                 }
+                console.log(data);
                 if (data.cost>0)
                     totalcost += (data.cost*data.qty);
                 items.push(data);
@@ -1344,6 +1349,8 @@ function WPOSSales() {
 
         custdata.id = $('#custid').val();
         custdata.name = $('#custname').val();
+        custdata.gstin = $('#custgstin').val();
+        custdata.statecode = $('#custstatecode').val();
         custdata.email = $('#custemail').val();
         custdata.phone = $('#custphone').val();
         custdata.mobile = $('#custmobile').val();
