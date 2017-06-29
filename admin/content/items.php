@@ -9,46 +9,47 @@
 </div><!-- /.page-header -->
 
 <div class="row">
-<div class="col-xs-12">
-<!-- PAGE CONTENT BEGINS -->
+    <div class="col-xs-12">
+        <!-- PAGE CONTENT BEGINS -->
 
-<div class="row">
-<div class="col-xs-12">
+        <div class="row">
+            <div class="col-xs-12">
 
-<div class="table-header">
-    Manage your business products
-</div>
+                <div class="table-header">
+                    Manage your business products
+                </div>
 
-<table id="itemstable" class="table table-striped table-bordered table-hover dt-responsive" style="width:100%;">
-<thead>
-<tr>
-    <th data-priority="0" class="center">
-        <label>
-            <input type="checkbox" class="ace" />
-            <span class="lbl"></span>
-        </label>
-    </th>
-    <th data-priority="1">ID</th>
-    <th data-priority="2">Name</th>
-    <th data-priority="8">Description</th>
-    <th data-priority="7">Tax</th>
-    <th data-priority="6">Default Qty</th>
-    <th data-priority="4">Price</th>
-    <th data-priority="5">Stockcode</th>
-    <th data-priority="9">Category</th>
-    <th data-priority="10">Supplier</th>
-    <th class="noexport" data-priority="2"></th>
-</tr>
-</thead>
-<tbody>
+                <table id="itemstable" class="table table-striped table-bordered table-hover dt-responsive" style="width:100%;">
+                    <thead>
+                    <tr>
+                        <th data-priority="0" class="center">
+                            <label>
+                                <input type="checkbox" class="ace" />
+                                <span class="lbl"></span>
+                            </label>
+                        </th>
+                        <th data-priority="1">ID</th>
+                        <th data-priority="2">Name</th>
+                        <th data-priority="9">Description</th>
+                        <th data-priority="8">Tax</th>
+                        <th data-priority="7">Default Qty</th>
+                        <th data-priority="4">Price</th>
+                        <th data-priority="5">Stockcode</th>
+                        <th data-priority="6">HSNcode</th>
+                        <th data-priority="10">Category</th>
+                        <th data-priority="11">Supplier</th>
+                        <th class="noexport" data-priority="2"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
 
-</tbody>
-</table>
+                    </tbody>
+                </table>
 
-</div>
-</div>
+            </div>
+        </div>
 
-</div><!-- PAGE CONTENT ENDS -->
+    </div><!-- PAGE CONTENT ENDS -->
 </div><!-- /.col -->
 <div id="editdialog" class="hide">
     <div class="tabbable" style="min-width: 360px; min-height: 310px;">
@@ -104,6 +105,10 @@
                         <td><input id="itemcode" type="text"/></td>
                     </tr>
                     <tr>
+                        <td style="text-align: right;"><label>HSNcode:&nbsp;</label></td>
+                        <td><input id="itemhsncode" type="text"/></td>
+                    </tr>
+                    <tr>
                         <td style="text-align: right;"><label>Category:&nbsp;</label></td>
                         <td><select id="itemcategory" class="catselect">
                             </select></td>
@@ -133,14 +138,14 @@
                         <div class="col-sm-12"><label>Simple Modifiers:</label></div>
                         <table class="table table-stripped table-responsive" style="margin-bottom: 0; padding-left: 10px; margin-right: 10px;">
                             <thead class="table-header smaller">
-                                <tr>
-                                    <th><small>Qty</small></th>
-                                    <th><small>Min Qty</small></th>
-                                    <th><small>Max Qty</small></th>
-                                    <th><small>Name</small></th>
-                                    <th><small>Price</small></th>
-                                    <th></th>
-                                </tr>
+                            <tr>
+                                <th><small>Qty</small></th>
+                                <th><small>Min Qty</small></th>
+                                <th><small>Max Qty</small></th>
+                                <th><small>Name</small></th>
+                                <th><small>Price</small></th>
+                                <th></th>
+                            </tr>
                             </thead>
                             <tbody id="itemmodtable">
 
@@ -163,8 +168,8 @@
 <div id="adddialog" class="hide">
     <table>
         <tr>
-           <td style="text-align: right;"><label>Name:&nbsp;</label></td>
-           <td><input id="newitemname" type="text"/><br/></td>
+            <td style="text-align: right;"><label>Name:&nbsp;</label></td>
+            <td><input id="newitemname" type="text"/><br/></td>
         </tr>
         <tr>
             <td style="text-align: right;"><label>Alternate Name:&nbsp;</label></td>
@@ -187,7 +192,7 @@
         <tr>
             <td style="text-align: right;"><label>Tax:&nbsp;</label></td>
             <td><select id="newitemtax" class="taxselect">
-            </select></td>
+                </select></td>
         </tr>
         <tr>
             <td style="text-align: right;"><label>Default Qty:&nbsp;</label></td>
@@ -197,16 +202,22 @@
             <td style="text-align: right;"><label>Stockcode:&nbsp;</label></td>
             <td><input id="newitemcode" type="text"/></td>
         </tr>
+
         <tr>
             <td style="text-align: right;"><label>Category:&nbsp;</label></td>
             <td><select id="newitemcategory" class="catselect">
                 </select></td>
         </tr>
         <tr>
+            <td style="text-align: right;"><label>HSNcode:&nbsp;</label></td>
+            <td><input id="newitemhsncode" type="text"/></td>
+        </tr>
+        <tr>
             <td style="text-align: right;"><label>Supplier:&nbsp;</label></td>
             <td><select id="newitemsupplier" class="supselect">
-            </select></td>
+                </select></td>
         </tr>
+
     </table>
 </div>
 
@@ -254,6 +265,7 @@
                 { "mData":"qty" },
                 { "mData":function(data,type,val){return (data['price']==""?"":WPOS.util.currencyFormat(data["price"]));} },
                 { "mData":"code" },
+                { "mData":"hsncode" },
                 { "mData":function(data,type,val){return (categories.hasOwnProperty(data.categoryid)?categories[data.categoryid].name:'None'); } },
                 { "mData":function(data,type,val){return (suppliers.hasOwnProperty(data.supplierid)?suppliers[data.supplierid].name:'None'); } },
                 { mData:null, sDefaultContent:'<div class="action-buttons"><a class="green" onclick="openEditDialog($(this).closest(\'tr\').find(\'td\').eq(1).text());"><i class="icon-pencil bigger-130"></i></a><a class="red" onclick="removeItem($(this).closest(\'tr\').find(\'td\').eq(1).text())"><i class="icon-trash bigger-130"></i></a></div>', "bSortable": false }
@@ -266,6 +278,7 @@
                 {type: "string"},
                 {type: "numeric"},
                 {type: "currency"},
+                {type: "string"},
                 {type: "string"},
                 {type: "string"},
                 {type: "string"},
@@ -321,33 +334,33 @@
         }
         // dialogs
         $( "#adddialog" ).removeClass('hide').dialog({
-                resizable: false,
-                width: 'auto',
-                modal: true,
-                autoOpen: false,
-                title: "Add Item",
-                title_html: true,
-                buttons: [
-                    {
-                        html: "<i class='icon-save bigger-110'></i>&nbsp; Save",
-                        "class" : "btn btn-success btn-xs",
-                        click: function() {
-                            saveItem(true);
-                        }
+            resizable: false,
+            width: 'auto',
+            modal: true,
+            autoOpen: false,
+            title: "Add Item",
+            title_html: true,
+            buttons: [
+                {
+                    html: "<i class='icon-save bigger-110'></i>&nbsp; Save",
+                    "class" : "btn btn-success btn-xs",
+                    click: function() {
+                        saveItem(true);
                     }
-                    ,
-                    {
-                        html: "<i class='icon-remove bigger-110'></i>&nbsp; Cancel",
-                        "class" : "btn btn-xs",
-                        click: function() {
-                            $( this ).dialog( "close" );
-                        }
-                    }
-                ],
-                create: function( event, ui ) {
-                    // Set maxWidth
-                    $(this).css("maxWidth", "460px");
                 }
+                ,
+                {
+                    html: "<i class='icon-remove bigger-110'></i>&nbsp; Cancel",
+                    "class" : "btn btn-xs",
+                    click: function() {
+                        $( this ).dialog( "close" );
+                    }
+                }
+            ],
+            create: function( event, ui ) {
+                // Set maxWidth
+                $(this).css("maxWidth", "460px");
+            }
         });
         $( "#editdialog" ).removeClass('hide').dialog({
             resizable: false,
@@ -414,6 +427,7 @@
         $("#itemcode").val(item.code);
         $("#itemcost").val(item.cost);
         $("#itemprice").val(item.price);
+        $("#itemhsncode").val(item.hsncode);
         $("#itemsupplier").val(item.supplierid);
         $("#itemcategory").val(item.categoryid);
         $("#itemtype").val(item.type);
@@ -477,6 +491,8 @@
             item.price = $("#newitemprice").val();
             item.supplierid = $("#newitemsupplier").val();
             item.categoryid = $("#newitemcategory").val();
+            item.hsncode = $("#newitemhsncode").val();
+            console.log(item.hsncode);
             item.type = "general";
             item.modifiers = [];
             result = WPOS.sendJsonData("items/add", JSON.stringify(item));
@@ -499,6 +515,8 @@
             item.price = $("#itemprice").val();
             item.supplierid = $("#itemsupplier").val();
             item.categoryid = $("#itemcategory").val();
+            item.hsncode = $("#itemhsncode").val();
+            console.log(item.hsncode);
             item.type = $("#itemtype").val();
             item.modifiers = [];
             $("#itemselmodtable .selmoditem").each(function(){
@@ -514,13 +532,13 @@
                 item.modifiers.push(mod);
             });
             $("#itemmodtable tr").each(function(){
-               var mod = {type:"simple"};
-               mod.qty = $(this).find(".modqty").val();
-               mod.minqty = $(this).find(".modminqty").val();
-               mod.maxqty = $(this).find(".modmaxqty").val();
-               mod.name = $(this).find(".modname").val();
-               mod.price = $(this).find(".modprice").val();
-               item.modifiers.push(mod);
+                var mod = {type:"simple"};
+                mod.qty = $(this).find(".modqty").val();
+                mod.minqty = $(this).find(".modminqty").val();
+                mod.maxqty = $(this).find(".modmaxqty").val();
+                mod.name = $(this).find(".modname").val();
+                mod.price = $(this).find(".modprice").val();
+                item.modifiers.push(mod);
             });
             result = WPOS.sendJsonData("items/edit", JSON.stringify(item));
             if (result!==false){
@@ -600,8 +618,8 @@
         }
 
         var csv = WPOS.data2CSV(
-            ['ID', 'Stock Code', 'Name', 'Description', 'Default Qty', 'Unit Cost', 'Unit Price', 'Tax Rule Name', 'Category Name', 'Supplier Name'],
-            ['id', 'code', 'name', 'description', 'qty', 'cost', 'price',
+            ['ID', 'Stock Code', 'HSN Code','Name', 'Description', 'Default Qty', 'Unit Cost', 'Unit Price', 'Tax Rule Name', 'Category Name', 'Supplier Name'],
+            ['id', 'code', 'hsncode','name', 'description', 'qty', 'cost', 'price',
                 {key:'taxid', func: function(value){ var taxtable = WPOS.getTaxTable().rules; return taxtable.hasOwnProperty(value) ? taxtable[value].name : 'Unknown'; }},
                 {key:'categoryid', func: function(value){ return categories.hasOwnProperty(value) ? categories[value].name : 'Unknown'; }},
                 {key:'supplierid', func: function(value){ return suppliers.hasOwnProperty(value) ? suppliers[value].name : 'Unknown'; }}
@@ -620,6 +638,7 @@
         importdialog = $("body").csvImport({
             jsonFields: {
                 'code': {title:'Stock Code', required: true},
+                'hsncode': {title:'HSN Code', required: true},
                 'name': {title:'Name', required: true},
                 'description': {title:'Description', required: false, value: ""},
                 'qty': {title:'Default Qty', required: false, value: 1},
@@ -649,6 +668,9 @@
         var percent_inc = total / 100;
         setModalLoaderStatus("Uploading data...");
         var data = {"options":options, "import_data": jsondata};
+        if (!result) {
+            showModalCloseButton("Item Import Failed!");
+        }
         var result = WPOS.sendJsonDataAsync('items/import/set', JSON.stringify(data), function(data){
             if (data!==false){
                 WPOS.startEventSourceProcess(
@@ -689,8 +711,6 @@
         }, function(error){
             showModalCloseButton("Item Import Failed!", error);
         });
-        if (!result)
-            showModalCloseButton("Item Import Failed!");
     }
 
     var eventuiinit = false;
