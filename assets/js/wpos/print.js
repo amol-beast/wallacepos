@@ -467,10 +467,14 @@ function WPOSPrint(kitchenMode) {
             case "wp":
                 if (getGlobalPrintSetting('escpreceiptmode')=='text') {
                     var data = getEscReceipt(record);
+                    console.log("escpreceiptmode text");
+                    //console.log(data);
                     printESCPReceipt(data);
                 } else {
                     // bitmap mode printing
                     var html = getHtmlReceipt(record, true);
+                    console.log("escpreceiptmode bitmap");
+                    //console.log(record);
                     getESCPHtmlString(html, printESCPReceipt);
                 }
                 return true;
@@ -1173,15 +1177,56 @@ function WPOSPrint(kitchenMode) {
                 }
             }
         };
+        console.log("Sale_ref");
+        console.log(record);
+
+        for (var i in temp_data.sale_items)
+        {
+            console.log(i);
+            console.log(temp_data.sale_items[i]);
+            //temp_data.sale_items[i].gsttax= WPOS.getTaxTable().items[record.sale_items[i].taxid].value;
+            console.log(WPOS.getTaxTable().rules[temp_data.sale_items[i].taxid].base[0]);
+            taxitemid = WPOS.getTaxTable().rules[temp_data.sale_items[i].taxid].base[0];
+
+            console.log("taxitemid");
+            console.log(WPOS.getTaxTable().items[taxitemid]);
+            if(taxitemid == null )
+            {
+                console.log("Tax is Null");
+                taxvalue = 0;
+            }
+            else
+            {
+                taxvalue = WPOS.getTaxTable().items[taxitemid].value;
+            }
+
+            console.log("taxvalue");
+            console.log(taxvalue);
+            temp_data.sale_items[i].gsttax= taxvalue;
+            //console.log("base:".base);
+
+        }
+        console.log("gsttax:");
+        console.log(temp_data);
+
+        console.log("print.js record items");
+        console.log(record.items);
         // format tax data
+
         var tax;
         temp_data.sale_tax = [];
+        var taxSum =0;
         for (var i in record.taxdata) {
             tax = WPOS.getTaxTable().items[i];
             var label = tax.name + ' (' + tax.value + '%)';
             var alttaxlabel = (tax.altname!=""?tax.altname:tax.name) + ' (' + tax.value + '%)';
             temp_data.sale_tax.push({label: label, altlabel: alttaxlabel, value: WPOS.util.currencyFormat(record.taxdata[i])});
+            taxSum += parseFloat(record.taxdata[i]);
         }
+        console.log("taxsum");
+        console.log(temp_data.sale_tax);
+        console.log(taxSum);
+        temp_data.taxsum = taxSum;
         // format payments and collect eftpos receipts
         temp_data.sale_payments = [];
         temp_data.eftpos_receipts = '';
@@ -1223,7 +1268,21 @@ function WPOSPrint(kitchenMode) {
                 temp_data.customer_country = customer.country;
             }
         }
-		// tablenum
+        if (record.custid==0) {
+            var custdata = record.custdata;
+            if (custdata) {
+                temp_data.customer_name = custdata.name;
+                temp_data.customer_address = custdata.address;
+                temp_data.customer_statecode = custdata.statecode;
+                temp_data.customer_postcode = custdata.postcode;
+                temp_data.customer_country = custdata.country;
+                temp_data.customer_gstin = custdata.gstin;
+            }
+        }
+        console.log("temp_data");
+        console.log(temp_data);
+
+        // tablenum
 		if (typeof record.orderdata !== 'undefined') {			
 			for (var i in record.orderdata) {
 				temp_data.tablenum_txt = (record.orderdata[i].tablenum>0?"Table #: " + record.orderdata[i].tablenum:"Take Away");
