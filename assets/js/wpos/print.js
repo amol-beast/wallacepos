@@ -1177,9 +1177,10 @@ function WPOSPrint(kitchenMode) {
                 }
             }
         };
+		console.log("Logo Url:" + temp_data.logo_url);
         console.log("Sale_ref");
         console.log(record);
-
+		var count =0;
         for (var i in temp_data.sale_items)
         {
             console.log(i);
@@ -1199,13 +1200,30 @@ function WPOSPrint(kitchenMode) {
             {
                 taxvalue = WPOS.getTaxTable().items[taxitemid].value;
             }
-
+			var line=0;
+			if(temp_data.sale_items[i].name.length>10)
+			{
+				line+=2;
+			}
+			else
+			{
+				line+=1;
+			}
+			count++;
             console.log("taxvalue");
             console.log(taxvalue);
             temp_data.sale_items[i].gsttax= taxvalue;
             //console.log("base:".base);
 
         }
+		console.log("count of items:" +count);
+		if(count >5)
+		{
+			var extra = count - 5;
+			temp_data.space = extra *(6.5 * line);
+			if(count>=18)
+				temp_data.space += 240;
+		}
         console.log("gsttax:");
         console.log(temp_data);
 
@@ -1227,6 +1245,8 @@ function WPOSPrint(kitchenMode) {
         console.log(temp_data.sale_tax);
         console.log(taxSum);
         temp_data.taxsum = taxSum;
+        temp_data.cgst = taxSum/2;
+        temp_data.sgst = taxSum/2;
         // format payments and collect eftpos receipts
         temp_data.sale_payments = [];
         temp_data.eftpos_receipts = '';
