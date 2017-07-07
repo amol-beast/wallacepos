@@ -622,7 +622,8 @@ class WposPosSale {
         $dobject = new stdClass();
         foreach ($devices as $value){
            if ($curdeviceid!=$value){ // remove the current device from broadcast
-                $dobject->$value = $value;
+                $value = trim($value);
+				$dobject->value = $value;
            }
         }
 

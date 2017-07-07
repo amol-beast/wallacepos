@@ -21,7 +21,7 @@ var port = (config && config.hasOwnProperty('feedserver_port')) ? config.feedser
 var ip = (!config || config.feedserver_proxy) ? '127.0.0.1' : '0.0.0.0';
 var hashkey = (config && config.hasOwnProperty('feedserver_key')) ? config.feedserver_key : "5d40b50e172646b845640f50f296ac3fcbc191a7469260c46903c43cc6310ace"; // key for php interaction, provides extra security
 
-app.listen(port, ip);
+app.listen(port, '0.0.0.0');
 
 io = require('socket.io').listen(app);
 
@@ -57,7 +57,7 @@ io.sockets.on('connection', function (socket) {
     // check for hashkey (for php authentication)
     if (!authed) {
         if (socket.handshake.query.hasOwnProperty('hashkey')) {
-            if ((hashkey == socket.handshake.query.hashkey) && (socket.request.connection.remoteAddress=="127.0.0.1")) {
+            if ((hashkey == socket.handshake.query.hashkey) && (socket.request.connection.remoteAddress=="0.0.0.0")) {
                 authed = true;
                 console.log("Authorised by hashkey: " + socket.handshake.query.hashkey);
             }
