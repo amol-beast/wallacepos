@@ -287,7 +287,7 @@ class DbUpdater {
             mkdir($_SERVER['DOCUMENT_ROOT'].$_SERVER['APP_ROOT']."docs/templates/");
         WposTemplates::restoreDefaults();
         // put alternate language values
-        $labels = json_decode('{"cash":"Cash","credit":"Credit","eftpos":"Eftpos","cheque":"Cheque","deposit":"Deposit","tendered":"Tendered","change":"Change","transaction-ref":"Transaction Ref","sale-time":"Sale Time","subtotal":"Subtotal","total":"Total","item":"Item","items":"Items","refund":"Refund","void-transaction":"Void Transaction"}}');
+        $labels = json_decode('{"cash":"Cash","card":"Card","credit":"Credit","eftpos":"Eftpos","cheque":"Cheque","deposit":"Deposit","tendered":"Tendered","change":"Change","transaction-ref":"Transaction Ref","sale-time":"Sale Time","subtotal":"Subtotal","total":"Total","item":"Item","items":"Items","refund":"Refund","void-transaction":"Void Transaction"}}');
         WposAdminSettings::putValue('general', 'altlabels', $labels);
         // set updated receipt currency symbol support values
         WposAdminSettings::putValue('pos', 'reccurrency', '');

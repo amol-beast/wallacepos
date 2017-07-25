@@ -1731,7 +1731,7 @@ $(function () {
                     WPOS.sales.addPayment('credit');
                     break;
                 case 67:
-                    WPOS.sales.addPayment('eftpos');
+                    WPOS.sales.addPayment('card');
                     break;
                 case 86:
                     WPOS.sales.addPayment('cheque');

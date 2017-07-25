@@ -27,7 +27,7 @@ class TestData {
     private $items;
     private $users;
     private $devices;
-    private $paymentMethods = ['eftpos','credit','cheque','deposit','cash'];
+    private $paymentMethods = ['eftpos','credit','cheque','deposit','cash','card'];
     private $wposSales;
 
     public function generateTestData($purge=false){
