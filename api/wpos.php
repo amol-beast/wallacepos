@@ -579,7 +579,10 @@ function routeApiCall($action, $data, $result) {
             $statsMdl = new WposAdminStats($data);
             $result = $statsMdl->getTaxStats($result);
             break;
-
+	case "stats/taxLocationsWise": // whats selling, grouped by stored items
+            $statsMdl = new WposAdminStats($data);
+            $result = $statsMdl->getDeviceBreakdownStats($result, 'location');
+            break;
         // GRAPH
         case "graph/general": // like the general stats, but in graph form/time.
             $graphMdl = new WposAdminGraph($data);

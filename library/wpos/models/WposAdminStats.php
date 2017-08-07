@@ -319,6 +319,98 @@ class WposAdminStats {
     }
 
     /**
+     * Get tax statistics Location wise from the current range
+     * @param $result
+     * @return mixed
+     */
+    public function getTaxLocationStats($result){
+        $stats = [];
+        $itemsMdl = new SaleItemsModel();
+        // check if params set, if not set defaults
+        $stime = isset($this->data->stime)?$this->data->stime:(strtotime('-1 week')*1000);
+        $etime = isset($this->data->etime)?$this->data->etime:(time()*1000);
+
+        if (is_array($saleitems = $itemsMdl->getTotalsRange($stime, $etime, true, $this->data->type))){
+            $taxMdl = new TaxItemsModel();
+            $taxdata = $taxMdl->get();
+            $taxes = [];
+            foreach ($taxdata as $value){
+                $taxes[$value['id']] = (object) $value;
+            }
+
+            foreach ($saleitems as $saleitem){
+                $itemtax = json_decode($saleitem['tax']);
+
+                if ($itemtax->total==0){
+                    if (!array_key_exists(-1, $stats)){
+                        $stats[-1] = new stdClass();
+                        $stats[-1]->refs = [];
+                        $stats[-1]->name = "Untaxed";
+                        $stats[-1]->qtyitems = 0;
+                        $stats[-1]->saletotal = 0;
+                        $stats[-1]->refundtotal = 0;
+                        $stats[-1]->saletax = 0;
+                        $stats[-1]->refundtax = 0;
+                    }
+                    if (!in_array($saleitem['ref'], $stats[-1]->refs))
+                        $stats[-1]->refs[] = $saleitem['ref'];
+                    $stats[-1]->qtyitems += $saleitem['qty'];
+                    $stats[-1]->saletotal += $saleitem['itemtotal'];
+                    $stats[-1]->refundtotal += $saleitem['refundtotal'];
+                } else {
+                    // subtotal excludes tax, factors in discount
+                    $discountedtax = $saleitem['discount']>0 ?  round($itemtax->total - ($itemtax->total*($saleitem['discount']/100)), 2) : $itemtax->total;
+                    //echo($discountedtax);
+                    $itemsubtotal = $saleitem['itemtotal'] - $discountedtax;
+                    $refundsubtotal = $saleitem['refundtotal'] - round(($discountedtax/$saleitem['qty']) * $saleitem['refundqty'], 2);
+                    foreach ($itemtax->values as $key=>$value){
+                        if (!array_key_exists($key, $stats)){
+                            $stats[$key] = new stdClass();
+                            $stats[$key]->refs = [];
+                            $stats[$key]->name = isset($taxes[$key])?$taxes[$key]->name:"Unknown";
+                            $stats[$key]->qtyitems = 0;
+                            $stats[$key]->saletotal = 0;
+                            $stats[$key]->refundtotal = 0;
+                            //$stats[$key]->saletax = 0;
+                            //$stats[$key]->refundtax = 0;
+                        }
+                        if (!in_array($saleitem['ref'], $stats[$key]->refs))
+                            $stats[$key]->refs[] = $saleitem['ref'];
+                        $stats[$key]->qtyitems += $saleitem['qty'];
+                        $stats[$key]->saletotal += $itemsubtotal; // subtotal excludes tax, factors in discount
+                        $stats[$key]->refundtotal += $refundsubtotal;
+                        //$stats[$key]->saletax += $saleitem['discount']>0 ? round($value - ($value*($saleitem['discount']/100)), 2) : $value;
+                        // $stats[$key]->refundtax += $saleitem['discount']>0 ? (round($value/($saleitem['discount']/100), 2)/$saleitem['qty'])*$saleitem['refundqty']: ($value/$saleitem['qty'])*$saleitem['refundqty'];
+                    }
+                }
+            }
+            foreach ($stats as $key=>$value){
+                $taxitems = WposAdminUtilities::getTaxTable()['items'];
+                $stats[$key]->saletax = round($taxitems[$key]['multiplier']*$stats[$key]->saletotal, 2);
+                $stats[$key]->refundtax = round($taxitems[$key]['multiplier']*$stats[$key]->refundtotal, 2);
+                $stats[$key]->balance = number_format($stats[$key]->saletax-$stats[$key]->refundtax, 2);
+            }
+            // Get cash rounding total
+            $roundtotals = $itemsMdl->getRoundingTotal($stime, $etime);
+            if ($roundtotals!==false){
+                $stats[0] = new stdClass();
+                $stats[0]->refs = $roundtotals[0]['refs'];
+                $stats[0]->name = "Cash Rounding";
+                $stats[0]->qty = $roundtotals[0]['num'];
+                $stats[0]->total = $roundtotals[0]['total'];
+            } else {
+                $result['error'] = $itemsMdl->errorInfo;
+            }
+        } else {
+            $result['error'] = $itemsMdl->errorInfo;
+        }
+
+        $result['data'] = $stats;
+
+        return $result;
+    }
+
+    /**
      * Get grouped sales stats for the current range, grouped by user, device or location
      * @param $result
      * @param string $type
@@ -341,6 +433,7 @@ class WposAdminStats {
         $defaults->salenum = 0;
         $defaults->refundtotal = 0;
         $defaults->refundnum = 0;
+        $defaults->locationid = 0;
         // get non voided sales
         if (($sales = $salesMdl->getGroupedTotals($stime, $etime, 3, false, $type))!==false){
             foreach ($sales as $sale){
@@ -353,6 +446,7 @@ class WposAdminStats {
                 $stats[$sale['groupid']]->salerefs = $sale['refs'];
                 $stats[$sale['groupid']]->saletotal = $sale['stotal'];
                 $stats[$sale['groupid']]->salenum = $sale['snum'];
+                $stats[$sale['groupid']]->locationid = $sale['locationid'];
             }
         } else {
             $result['error']= "Error getting sales: ".$salesMdl->errorInfo;
@@ -369,6 +463,7 @@ class WposAdminStats {
                 $stats[$void['groupid']]->voidrefs = $void['refs'];
                 $stats[$void['groupid']]->voidtotal = $void['stotal'];
                 $stats[$void['groupid']]->voidnum = $void['snum'];
+                $stats[$sale['groupid']]->locationid = $sale['locationid'];
             }
         } else {
             $result['error']= "Error getting voided sales: ".$salesMdl->errorInfo;
@@ -385,6 +480,7 @@ class WposAdminStats {
                 $stats[$refund['groupid']]->refundrefs = $refund['refs'];
                 $stats[$refund['groupid']]->refundtotal = $refund['stotal'];
                 $stats[$refund['groupid']]->refundnum = $refund['snum'];
+                $stats[$sale['groupid']]->locationid = $sale['locationid'];
             }
         } else {
             $result['error']= "Error getting refunds: ".$voidMdl->errorInfo;

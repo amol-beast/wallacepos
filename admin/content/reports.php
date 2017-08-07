@@ -14,6 +14,7 @@
         <option value="stats/locations">Location Takings</option>
         <option value="stats/users">User Takings</option>
         <option value="stats/tax">Tax Breakdown</option>
+        <option value="stats/taxLocationsWise">Tax Location Wise Breakdown</option>
     </select>
     <div style="display: inline-block; vertical-align:middle; margin-right: 20px;">
         <label>Transactions
@@ -86,6 +87,10 @@
                 break;
             case "stats/tax":
                 populateTax();
+		break;
+	    case "stats/taxLocationsWise":
+                populateTaxLocationsWise("Tax Breakdown Location Wise", "Location Name"); 
+		break;
         }
         // hide loader
         WPOS.util.hideLoader();
@@ -120,6 +125,7 @@
         var html = getReportHeader(repname);
         html += "<table class='table table-stripped' style='width: 100%'><thead><tr><td>"+colname+"</td><td># Sales</td><td>Takings</td><td># Refunds</td><td>Refunds</td><td>Balance</td></tr></thead><tbody>";
         var rowdata;
+	console.log(repdata);
         for (var i in repdata){
             rowdata = repdata[i];
             html += '<tr><td><a onclick="WPOS.transactions.openTransactionList(\''+rowdata.refs+'\');">'+(rowdata.hasOwnProperty('name')?rowdata.name:i)+'</a></td><td>'+rowdata.salenum+'</td><td>'+WPOS.util.currencyFormat(rowdata.saletotal)+'</td><td><a onclick="WPOS.transactions.openTransactionList(\''+rowdata.refundrefs+'\');">'+rowdata.refundnum+'</a></td><td>'+WPOS.util.currencyFormat(rowdata.refundtotal)+'</td><td>'+WPOS.util.currencyFormat(rowdata.balance)+'</td></tr>';
@@ -177,6 +183,117 @@
         $("#reportcontain").html(html);
     }
 
+    function populateTaxLocationsWise(repname, colname){
+      var html = getReportHeader(repname);
+        
+        var rowdata;
+	    console.log(repdata);
+        var temp_data=[];
+        for(var i in repdata)
+        {
+            rowdata = repdata[i];
+	   
+            var locationid = parseInt(rowdata["locationid"]);
+            temp_data[locationid]= {};
+            console.log(temp_data[locationid]);
+            temp_data[locationid].items = 0;
+            temp_data[locationid].sale_subtotal = 0;
+            temp_data[locationid].tax = 0;
+            temp_data[locationid].refund_subtotal = 0;
+            temp_data[locationid].refund_tax = 0;
+            temp_data[locationid].total_tax = 0;
+            temp_data[locationid].name = 0;
+            temp_data[locationid].taxid = {};
+
+        }
+        //console.log("temp_data in  next line");
+        //console.log(temp_data);
+        for(var i in repdata){
+		    rowdata = repdata[i];
+            var locationid = parseInt(rowdata["locationid"]);
+            var location = rowdata["name"];
+            temp_data[locationid].name = location;
+            console.log("rowdata next line");
+		    console.log(rowdata);
+		    var refArray = rowdata.refs.split(',');
+            var transactions= loadTransactions(refArray);
+            console.log("transactions next line");
+            console.log(transactions);
+            //console.log(refArray);
+            for(var j in transactions)
+            {
+                var items = transactions[j].items;
+                for (var k in items)
+                {
+
+                    var itemtaxid = parseInt(items[k].taxid);
+                    if(typeof (temp_data[locationid][itemtaxid]) == 'undefined')
+                    {
+                        temp_data[locationid][itemtaxid] = {};
+                        temp_data[locationid][itemtaxid].price = parseFloat(items[k].price);
+                        temp_data[locationid][itemtaxid].items = parseInt(items[k].qty);
+                        var taxObject = items[k].tax;
+                        temp_data[locationid][itemtaxid].total_tax= parseFloat(taxObject.total);
+                    }
+                    else
+                    {
+                        temp_data[locationid][itemtaxid].price += parseFloat(items[k].price);
+                        temp_data[locationid][itemtaxid].items += parseInt(items[k].qty);
+                        var taxObject = items[k].tax;
+			//console.log("taxobject follows");
+			//console.log(items[k]);
+                        temp_data[locationid][itemtaxid].total_tax += parseFloat(taxObject.total);
+                    }
+                }
+
+            }
+
+
+
+	}
+        console.log("temp_data is:");
+        //console.log(temp_data);
+        var taxrules = WPOS.getTaxTable().rules;
+        console.log("taxxrules:");
+        console.log(taxrules);
+
+	console.log("### Printing Temp_Data");
+        for ( var i in temp_data)
+        {   console.log("Location id:"+ i +" Location Name:"+ temp_data[i].name);
+            console.log(temp_data[i]);
+	html += "<h5>Location:"+temp_data[i].name+"</h5>";
+	html += "<table class='table table-stripped' style='width: 100%'><thead><tr><td>Name</td><td># Items</td><td>Sale Subtotal</td><td>Tax</td></tr></thead><tbody>";
+        var totalLocationTaxSum = 0;    
+	for (var j in temp_data[i])
+            {
+                if(typeof (temp_data[i][j]) == 'undefined' ||  typeof(taxrules[j]) == 'undefined')
+                {
+                    continue;
+                }
+                else {
+                    console.log("j:"+j);
+		    
+                    console.log(temp_data[i][j]);
+                console.log("Tax id:"+j+ " Tax name:"+taxrules[j].name);
+                }
+		html += '<tr><td>'+taxrules[j].name+'</td><td>'+temp_data[i][j].items+'</td><td>'+WPOS.util.currencyFormat(temp_data[i][j].price)+'</td><td>'+WPOS.util.currencyFormat(temp_data[i][j].total_tax)+'</td></tr>';
+		totalLocationTaxSum += temp_data[i][j].total_tax ;
+            }
+	html += "<h5>Total Tax:"+totalLocationTaxSum + "</h5>";	
+	html += "</tbody></table>";
+
+        }
+/*
+        for (var i in repdata){
+            rowdata = repdata[i];
+	    html += '<tr><td><a onclick="WPOS.transactions.openTransactionList(\''+rowdata.refs+'\');">'+rowdata.name+'</a></td><td>'+rowdata.qtyitems+'</td><td>'+WPOS.util.currencyFormat(rowdata.saletotal)+'</td><td>'+WPOS.util.currencyFormat(rowdata.saletax)+'</td><td>'+WPOS.util.currencyFormat(rowdata.refundtotal)+'</td></tr>';
+
+        }
+*/
+        
+
+        $("#reportcontain").html(html);
+    }
     function populateStock(){
         var html = getCurrentReportHeader("Current Stock");
         html += "<table class='table table-stripped' style='width: 100%'><thead><tr><td>Name</td><td>Supplier</td><td>Location</td><td>Stock Qty</td><td>Stock Value</td></tr></thead><tbody>";
@@ -241,4 +358,9 @@
         // hide loader
         WPOS.util.hideLoader();
     });
+    function loadTransactions(refs) {
+        console.log("loadTransactions");
+        var trans= WPOS.sendJsonData("transactions/get", JSON.stringify({refs: refs}));
+        return trans;
+    }
 </script>

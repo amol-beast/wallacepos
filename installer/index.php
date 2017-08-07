@@ -59,10 +59,14 @@ function checkDependencies(){
     // check node installation
 	chdir($_SERVER['DOCUMENT_ROOT'].$_SERVER['APP_ROOT'].'api/'); // node extension gets installed along with server.js
 	$nodeextensions = json_decode(shell_exec("npm ls --json")); // detect node.js existence using npm
-	if ($nodeextensions == NULL) {
+//print(shell_exec("npm ls --json"));	
+if ($nodeextensions == NULL) {
 		$result['node'] = false;
 		$result['node_socketio'] = false;
 		$result['all'] = false;
+print("here");
+die();
+
 	} else {
         if (!$result['node_socketio']=(isset($nodeextensions->dependencies->{"socket.io"}) && !$nodeextensions->dependencies->{"socket.io"}->missing))
             $result['all'] = false;

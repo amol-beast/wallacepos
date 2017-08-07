@@ -1169,6 +1169,7 @@ function WPOSPrint(kitchenMode) {
             footer: config.pos.recfooter,
             thermalprint: escpprint,
             print_id: config.pos.recprintid,
+			cashier: WPOS.users[record.userid].username,
             print_desc: config.pos.recprintdesc,
             qrcode_url: config.pos.recqrcode!=""?document.location.protocol+"//"+document.location.host+"/docs/qrcode.png":null,
             currency: function() {

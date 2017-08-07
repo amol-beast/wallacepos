@@ -539,7 +539,7 @@ class WposAdminItems {
     private $permissionMap = [
         "readapicalls" => [
             "dashboard" => ['stats/general', 'stats/takings', 'stats/itemselling', 'stats/locations', 'stats/devices', 'graph/general'],
-            "reports" => ['stats/general', 'stats/takings', 'stats/itemselling','stats/categoryselling', 'stats/supplyselling', 'stats/stock', 'stats/devices', 'stats/locations', 'stats/users', 'stats/tax'],
+            "reports" => ['stats/general', 'stats/takings', 'stats/itemselling','stats/categoryselling', 'stats/supplyselling', 'stats/stock', 'stats/devices', 'stats/locations', 'stats/users', 'stats/tax','stats/taxLocationsWise'],
             "graph" => ['graph/general', 'graph/takings', 'graph/devices', 'graph/locations'],
             "realtime" => ['stats/general', 'graph/general'],
             "sales" => [],
