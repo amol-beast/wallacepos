@@ -540,7 +540,7 @@ $(function () {
 });
 
 function WPOSSales() {
-    var paymentMethods = ['eftpos', 'credit', 'cash', 'cheque', 'deposit'];
+    var paymentMethods = ['eftpos', 'credit', 'cash', 'cheque', 'deposit','card'];
     var cursubtotal = 0.00;
     var curtaxtotal = 0.00;
     var curtotal = 0.00;
@@ -920,6 +920,7 @@ function WPOSSales() {
             '<option value="cash" '+(method=='cash'?'selected':'')+'>Cash</option>' +
             '<option value="cheque" '+(method=='cheque'?'selected':'')+'>Cheque</option>' +
             '<option value="deposit" '+(method=='deposit'?'selected':'')+'>Deposit</option>' +
+            '<option value="card" '+(method=='card'?'selected':'')+'>Card</option>' +
             exmethod+ '</select>' +
             '<div class="cashvals" '+(method!='cash'?'style="display: none"':'width:150px;')+'>' +
             '<div style="width: 100px; display: inline-block;">Tendered:</div><input onChange="WPOS.sales.updatePaymentChange($(this).parent());" class="paytender numpad" style="width:50px;" type="text" value="'+(method!='cash'?0.00:(tender!=null?tender:value))+'" />' +

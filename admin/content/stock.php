@@ -28,9 +28,10 @@
                 </label>
             </th>
             <th data-priority="2">Name</th>
-            <th data-priority="5">Supplier</th>
-            <th data-priority="3">Location</th>
-            <th data-priority="4">Qty</th>
+            <th data-priority="3">Price</th>
+            <th data-priority="6">Supplier</th>
+            <th data-priority="4">Location</th>
+            <th data-priority="5">Qty</th>
             <th data-priority="1" class="noexport"></th>
         </tr>
     </thead>
@@ -114,6 +115,8 @@
     var datatable;
     $(function() {
         stock = WPOS.getJsonData("stock/get");
+	console.log("stock array");
+	console.log(stock);
         var stockarray = [];
         var tempstock;
         for (var key in stock){
@@ -127,6 +130,7 @@
             "aoColumns": [
                 { mData:null, sDefaultContent:'<div style="text-align: center"><label><input class="ace dt-select-cb" type="checkbox"><span class="lbl"></span></label><div>', bSortable: false },
                 { mData:function(data,type,val){return (data.name==null?"Unknown":data.name) } },
+                { mData:function(data,type,val){ return (data.lprice==null?"Unknown":data.lprice)} },
                 { mData:"supplier" },
                 { mData:function(data,type,val){return (data.locationid!=='0'?(WPOS.locations.hasOwnProperty(data.locationid)?WPOS.locations[data.locationid].name:'Unknown'):'Warehouse');} },
                 { mData:"stocklevel" },
@@ -134,6 +138,7 @@
             ],
             "columns": [
                 {},
+                {type: "string"},
                 {type: "string"},
                 {type: "string"},
                 {type: "string"},
@@ -336,8 +341,32 @@
             items = WPOS.sendJsonData("items/get");
             var itemselect = $(".itemselect");
             itemselect.html('');
-            for (var i in items){
-                itemselect.append('<option class="itemid-'+items[i].id+'" value="'+items[i].id+'">'+items[i].name+'</option>');
+		console.log("items before sorting:");
+		console.log(items);
+		var array=[];
+		for (var i in items)
+		{
+			array.push(i,items[i]);
+		}
+		console.log("Created Array");
+		console.log(array);
+	    array.sort(function(a,b) {
+		var val1= (a.name ==b.name)? 0 : (a.name > b.name) ?1 : -1 ;
+		var val2 =-1;
+		if(val1==0)
+			{
+				if(a.price> b.price ) val2 =1;
+				else
+					val2=-1;
+			}
+		else
+			return val1;
+		return val2;
+		});
+		console.log("items after sorting:");
+		console.log(array);
+	    for (var i in items){
+                itemselect.append('<option class="itemid-'+items[i].id+'" value="'+items[i].id+'">'+items[i].name + "          -      " + "Rs. " + items[i].price +'</option>');
             }
             WPOS.util.hideLoader();
         }
