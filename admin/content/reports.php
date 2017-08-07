@@ -204,6 +204,8 @@
             temp_data[locationid].total_tax = 0;
             temp_data[locationid].name = 0;
             temp_data[locationid].taxid = {};
+            temp_data[locationid]["card"] = {};
+            temp_data[locationid]["cash"] = {};
 
         }
         //console.log("temp_data in  next line");
@@ -223,26 +225,31 @@
             for(var j in transactions)
             {
                 var items = transactions[j].items;
-                for (var k in items)
+		var payments = transactions[j].payments;
+		console.log("payments follows");
+		console.log(payments);
+		var paymentType = payments[0].method;
+		for (var k in items)
                 {
 
                     var itemtaxid = parseInt(items[k].taxid);
                     if(typeof (temp_data[locationid][itemtaxid]) == 'undefined')
                     {
-                        temp_data[locationid][itemtaxid] = {};
-                        temp_data[locationid][itemtaxid].price = parseFloat(items[k].price);
-                        temp_data[locationid][itemtaxid].items = parseInt(items[k].qty);
+                        
+			temp_data[locationid][paymentType][itemtaxid] = {};
+                        temp_data[locationid][paymentType][itemtaxid].price = parseFloat(items[k].price);
+                        temp_data[locationid][paymentType][itemtaxid].items = parseInt(items[k].qty);
                         var taxObject = items[k].tax;
-                        temp_data[locationid][itemtaxid].total_tax= parseFloat(taxObject.total);
+                        temp_data[locationid][paymentType][itemtaxid].total_tax= parseFloat(taxObject.total);
                     }
                     else
                     {
-                        temp_data[locationid][itemtaxid].price += parseFloat(items[k].price);
-                        temp_data[locationid][itemtaxid].items += parseInt(items[k].qty);
+                        temp_data[locationid][paymentType][itemtaxid].price += parseFloat(items[k].price);
+                        temp_data[locationid][paymentType][itemtaxid].items += parseInt(items[k].qty);
                         var taxObject = items[k].tax;
 			//console.log("taxobject follows");
 			//console.log(items[k]);
-                        temp_data[locationid][itemtaxid].total_tax += parseFloat(taxObject.total);
+                        temp_data[locationid][paymentType][itemtaxid].total_tax += parseFloat(taxObject.total);
                     }
                 }
 
@@ -252,7 +259,7 @@
 
 	}
         console.log("temp_data is:");
-        //console.log(temp_data);
+        console.log(temp_data);
         var taxrules = WPOS.getTaxTable().rules;
         console.log("taxxrules:");
         console.log(taxrules);
@@ -261,28 +268,34 @@
         for ( var i in temp_data)
         {   console.log("Location id:"+ i +" Location Name:"+ temp_data[i].name);
             console.log(temp_data[i]);
-	html += "<h5>Location:"+temp_data[i].name+"</h5>";
-	html += "<table class='table table-stripped' style='width: 100%'><thead><tr><td>Name</td><td># Items</td><td>Sale Subtotal</td><td>Tax</td></tr></thead><tbody>";
-        var totalLocationTaxSum = 0;    
-	for (var j in temp_data[i])
-            {
-                if(typeof (temp_data[i][j]) == 'undefined' ||  typeof(taxrules[j]) == 'undefined')
-                {
-                    continue;
-                }
-                else {
-                    console.log("j:"+j);
-		    
-                    console.log(temp_data[i][j]);
-                console.log("Tax id:"+j+ " Tax name:"+taxrules[j].name);
-                }
-		html += '<tr><td>'+taxrules[j].name+'</td><td>'+temp_data[i][j].items+'</td><td>'+WPOS.util.currencyFormat(temp_data[i][j].price)+'</td><td>'+WPOS.util.currencyFormat(temp_data[i][j].total_tax)+'</td></tr>';
-		totalLocationTaxSum += temp_data[i][j].total_tax ;
-            }
-	html += "<h5>Total Tax:"+totalLocationTaxSum + "</h5>";	
-	html += "</tbody></table>";
 
-        }
+		html += "</br></br><h4 style='text-align: center'>Location: "+temp_data[i].name+"</h3>";
+		var paymentsType = ["cash","card"];
+		for ( var m in paymentsType)
+		{
+		var paymentType = paymentsType[m];
+		html += "<h5 style='text-align: center'>Payment Method:"+paymentType+"</h5>";	
+		html += "<table class='table table-stripped' style='width: 100%'><thead><tr><td>Name</td><td># Items</td><td>Sale Subtotal</td><td>Tax</td></tr></thead><tbody>";
+        	var totalLocationTaxSum = 0;    
+			for (var j in temp_data[i][paymentType])
+        		{
+		                if(typeof (temp_data[i][paymentType][j]) == 'undefined' ||  typeof(taxrules[j]) == 'undefined')
+                		{
+		                    continue;
+                		}
+		                else {
+                		    console.log("j:"+j);
+		                    console.log(temp_data[i][paymentType][j]);
+			            console.log("Tax id:"+j+ " Tax name:"+taxrules[j].name);
+                		      }
+				html += '<tr><td>'+taxrules[j].name+'</td><td>'+temp_data[i][paymentType][j].items+'</td><td>'+WPOS.util.currencyFormat(temp_data[i][paymentType][j].price)+'</td><td>'+WPOS.util.currencyFormat(temp_data[i][paymentType][j].total_tax)+'</td></tr>';
+				totalLocationTaxSum += temp_data[i][paymentType][j].total_tax ;
+            		}
+		html += "<h5 style='text-align: center'>Total Tax:"+totalLocationTaxSum + "</h5>";	
+		html += "</tbody></table></hr>";
+
+        	}
+	}
 /*
         for (var i in repdata){
             rowdata = repdata[i];
