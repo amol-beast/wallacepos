@@ -105,7 +105,18 @@ class WposPosData
 
         return $result;
     }
-
+/**
+     * @param array $result
+     *
+     * @return array of stored item records
+     */
+    public function getLocationQtyItems($result)
+    {
+        $stockMdl = new StockModel();
+        $locationQty = $stockMdl->get($this->data->id, $this->data->locationid);
+        $result['data'] = $locationQty;
+        return $result;
+    }
     /**
      * @param array $result
      *

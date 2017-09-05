@@ -1511,7 +1511,12 @@ $(function () {
     WPOS.initApp();
 
     $("#wrapper").tabs();
-
+    var location1 = WPOS.getConfigTable().locationname;
+    if(location1 !="godown")
+    {
+        $("#stockTransfer1").remove();
+        $("#tabs-5").remove();
+    }
     $("#paymentsdiv").dialog({
         maxWidth : 380,
         width : 'auto',
@@ -1770,7 +1775,34 @@ function setItemListPadding(){
     var height = $("#totals").height();
     $("#items").css("margin-bottom", (80+height)+"px");
 }
-
+function initStockTransfer(){
+    var height = $("#totals").height();
+    $("#stockTransferitems").css("margin-bottom", (80+height)+"px");
+    var locations = WPOS.sendJsonData("locations/get", "");
+    var html ="";
+	for (var i in locations)
+    {
+        html += '<option value="' + locations[i].id + '">'+ locations[i].name+'</option>'
+    }
+    $("#transferLocation").append(html);
+	var location = WPOS.getConfigTable().locationname;
+	if(location !="godown")
+    {
+        $("#stockTransfer1").remove();
+        $("#tabs-5").remove();
+    }
+}
+function abortStockTransfer()
+{
+    var response = confirm("Are you sure you want to cancel the Stock Transfer Operation?");
+    if (!response)
+        return;
+    else {
+    initStockTransfer();
+    $("#stockTransferItemTable").html('');
+    $("#invaliditemnotice").hide();
+    }
+}
 function expandWindow(){
     var wrapper = $("#wrapper");
     var maxWidth = wrapper.css("max-width");

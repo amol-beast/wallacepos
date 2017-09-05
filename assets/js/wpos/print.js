@@ -1181,16 +1181,10 @@ function WPOSPrint(kitchenMode) {
         console.log("Sale_ref");
         console.log(record);
 		var count =0;
+        var taxVal=[];
         for (var i in temp_data.sale_items)
         {
-            console.log(i);
-            console.log(temp_data.sale_items[i]);
-            //temp_data.sale_items[i].gsttax= WPOS.getTaxTable().items[record.sale_items[i].taxid].value;
-            console.log(WPOS.getTaxTable().rules[temp_data.sale_items[i].taxid].base[0]);
             taxitemid = WPOS.getTaxTable().rules[temp_data.sale_items[i].taxid].base[0];
-
-            console.log("taxitemid");
-            console.log(WPOS.getTaxTable().items[taxitemid]);
             if(taxitemid == null )
             {
                 console.log("Tax is Null");
@@ -1200,6 +1194,14 @@ function WPOSPrint(kitchenMode) {
             {
                 taxvalue = WPOS.getTaxTable().items[taxitemid].value;
             }
+            taxName = WPOS.getTaxTable().items[taxitemid].name;
+            if(taxVal[taxName] == null) {
+                taxVal[taxName]= new Array();
+                taxVal[taxName]["value"] = 0.0;
+                taxVal[taxName]["taxable"] = 0.0;
+            }
+            taxVal[taxName]["taxable"] += temp_data.sale_items[i].price;
+
 			var line=0;
 			if(temp_data.sale_items[i].name.length>10)
 			{
@@ -1210,13 +1212,8 @@ function WPOSPrint(kitchenMode) {
 				line+=1;
 			}
 			count++;
-            console.log("taxvalue");
-            console.log(taxvalue);
             temp_data.sale_items[i].gsttax= taxvalue;
-            //console.log("base:".base);
-
         }
-		console.log("count of items:" +count);
 		if(count >5)
 		{
 			var extra = count - 5;
@@ -1233,14 +1230,22 @@ function WPOSPrint(kitchenMode) {
 
         var tax;
         temp_data.sale_tax = [];
+
         var taxSum =0;
         for (var i in record.taxdata) {
             tax = WPOS.getTaxTable().items[i];
             var label = tax.name + ' (' + tax.value + '%)';
+            if(taxVal[tax.name] == null) {
+                taxVal[tax.name] = 0.0;
+                taxVal[tax.name]["value"] = tax.value;
+            }
+            taxVal[tax.name] += parseFloat(record.taxdata[i]);
             var alttaxlabel = (tax.altname!=""?tax.altname:tax.name) + ' (' + tax.value + '%)';
             temp_data.sale_tax.push({label: label, altlabel: alttaxlabel, value: WPOS.util.currencyFormat(record.taxdata[i])});
             taxSum += parseFloat(record.taxdata[i]);
         }
+        console.log("taxval");
+        console.log(taxVal);
         console.log("taxsum");
         console.log(temp_data.sale_tax);
         console.log(taxSum);

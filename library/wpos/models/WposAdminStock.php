@@ -65,10 +65,37 @@ class WposAdminStock {
         }
         return false;
     }
-
+    public function transferMultipleStocks($result)
+    {
+        foreach($this->data as $arr) {
+            if ($this->createStockHistory($arr->storeditemid, $arr->locationid, 'Stock Transfer', $arr->amount, $arr->newlocationid, 0) === false) { // stock history created with minus
+                $result['error'] = "Could not create stock history record";
+                return $result;
+            }
+            // remove stock amount from current location
+            if ($this->incrementStockLevel($arr->storeditemid, $arr->locationid, $arr->amount, true) === false) {
+                $result['error'] = "Could not decrement stock from current location";
+                return $result;
+            }
+            // create history record for added stockd
+            if ($this->createStockHistory($arr->storeditemid, $arr->newlocationid, 'Stock Transfer', $arr->amount, $arr->locationid, 1) === false) {
+                $result['error'] = "Could not create stock history record";
+                return $result;
+            }
+            // add stock amount to new location
+            if ($this->incrementStockLevel($arr->storeditemid, $arr->newlocationid, $arr->amount, false) === false) {
+                $result['error'] = "Could not add stock to the new location";
+                return $result;
+            }
+        }
+            // Success; log data
+            Logger::write("Stock Transfer", "STOCK", json_encode($arr));
+            $result["data"] = json_encode(array("success" => true ));
+            return $result;
+    }
     /**
      * Transfer stock to another location
-     * @param $result
+     * @param $results
      * @return mixed
      */
     public function transferStock($result){

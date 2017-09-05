@@ -216,7 +216,18 @@ function routeApiCall($action, $data, $result) {
             $trans = new WposTransactions($data);
             $result = $trans->getTransaction($result);
             break;
-
+	    case "locationItemQty/get":
+	        $jsondata = new WposPosData($data);
+            $result = $jsondata->getLocationQtyItems($result);
+            break;
+        case "stock/transferMultiple":
+            $stockMdl = new WposAdminStock($data);
+            $result = $stockMdl->transferMultipleStocks($result);
+            break;
+        case "stock/transferMultiple/generateInvoice":
+            $invMdl = new WposTransactions($data, null, false);
+            $invMdl->generateStockTransferInvoice();
+            break;
         default:
             $notinprev = true;
     }

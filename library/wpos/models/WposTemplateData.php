@@ -58,6 +58,11 @@ class WposTemplateData
     public $invoice_duedt;
     public $customer = false;
 
+    //For Stock Transfer Invoice
+    public $stock_transfer_items;
+    public $stock_transfer;
+    public $source_location;
+    public $new_location;
     public $Utils;
 
     /**
@@ -93,10 +98,35 @@ class WposTemplateData
      * @param array $config
      * @param bool $invoice
      */
-    public function WposTemplateData($data, $config=[], $invoice = false){
+    public function WposTemplateData($data, $config=[], $invoice = false, $stockTransfer = false){
         $this->Utils = new WposAdminUtilities();
         $this->Utils->setCurrencyFormat($config['general']->currencyformat);
+        if($stockTransfer)
+        {
 
+            $this->stock_transfer = true;
+            $this->business_name  = $config['general']->bizname;
+            $this->business_address  = $config['general']->bizaddress;
+            $this->business_suburb  = $config['general']->bizsuburb;
+            $this->business_state  = $config['general']->bizstate;
+            $this->business_postcode  = $config['general']->bizpostcoe;
+            $this->business_country  = $config['general']->bizcountry;
+            $this->business_number  = $config['general']->biznumber;
+            $this->stock_transfer_items=[];
+            $this->date = date('d-m-Y');
+            $total = 0;
+            foreach ($data as $key=>$value){
+                $this->stock_transfer_items[$key] = $value;
+                $this->stock_transfer_items[$key]->cost = $value->amount * $value->unitPrice;
+                $this->stock_transfer_items[$key]->index = $key +1;
+                $total += $this->stock_transfer_items[$key]->cost;
+                $this->sourceLocation = $value->sourceLocation;
+                $this->newLocation = $value->newLocation;
+            }
+            $this->total = $total;
+        }
+        else
+        {
         $this->sale_id = $data->id;
         $this->sale_ref = $data->ref;
         $this->sale_dt = $this->Utils->getDateFromTimestamp($data->processdt, $config['general']->dateformat);
@@ -207,6 +237,7 @@ class WposTemplateData
                     $this->eftpos_receipts = $data->refunddata[$lastrefindex]->paydata->customerReceipt;
                 }
             }
+        }
         }
     }
 }

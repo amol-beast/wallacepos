@@ -78,6 +78,7 @@
     <h3 style="text-align: center; margin: 4px;">{{header_line1}}</h3>
     <strong style="text-align: center">{{header_line2}}</strong>
     {{#header_line3}}
+    <br/><strong style="text-align: center">ISKCON MAYAPUR</strong>
         <br/><strong style="text-align: center">{{header_line3}}</strong>
     {{/header_line3}}
 
@@ -149,10 +150,10 @@
             <tr><td colspan="2"><b>Subtotal: </b></td><td style="text-align: right;"><b style="text-decoration: overline;">{{#currency}}{{sale_subtotal}}{{/currency}}</b></td></tr>
         {{/show_subtotal}}
 -->
-        
+
             <tr><td colspan="2">Total CGST:</td><td style="text-align: right;">{{#currency}}{{cgst}}{{/currency}}</td></tr>
             <tr><td colspan="2">Total SGST:</td><td style="text-align: right;">{{#currency}}{{sgst}}{{/currency}}</td></tr>
-        
+
         <tr><td colspan="2"><b>Total Taxes:</b></td><td style="text-align: right;"><b style="text-decoration: overline;">{{#currency}}{{taxsum}}{{/currency}}</b></td></tr>
 
 
@@ -183,7 +184,7 @@
 
     {{#footer}}
         <h3 style="text-align: right;float:right">Authorised Signatory</h3>
-         <div style="margin-top:100px;text-align:center;margin-bottom:{{space}}px;float:center;float:bottom;font-size:25px;font-weight:bold">{{footer}}</div>
+         <div style="margin-top:100px;text-align:center;margin-bottom:{{space}}px;float:center;float:bottom;font-size:25px;font-weight:bold"><h3>Chant Hare Krishna and Be Happy</h3>{{footer}}</div>
 
     {{/footer}}
     <div style="margin-bottom:600px">**</div>

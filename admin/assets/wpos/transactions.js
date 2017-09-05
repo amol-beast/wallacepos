@@ -712,6 +712,22 @@ function WPOSTransactions() {
 
         window.open(link, '_blank');
     };
+    this.generateStockTransferInvoice = function(type, download, template) {
+        var link = "/api/stock/transferMultiple/generateInvoice";
+        if (type == "html") {
+            link += "&type=html";
+        } else {
+            link += "&type=pdf";
+        }
+        if (download == 1) {
+            link += "&download=1";
+        } else {
+            link += "&download=0";
+        }
+        link += "&template="+template;
+
+        window.open(link, '_blank');
+    };
 
     this.emailInvoice = function(){
         var to = $("#emailto").val();

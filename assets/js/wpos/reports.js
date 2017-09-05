@@ -161,6 +161,7 @@ function WPOSReports() {
                         method = sale.refunddata[i].method;
                         data.refundnum++;
                         data.refundtotal += amount;
+		        var discount = sale.subtotal + sale.tax - sale.total;
                         // add payment type totals
                         if (data.methodtotals.hasOwnProperty(method)) { // check if payment method field is alredy set
                             data.methodtotals[method].refamount += amount;
@@ -181,15 +182,18 @@ function WPOSReports() {
                     data.salesnum++;
                     data.salestotal += parseFloat(sale.total);
                     // calc payment methods
+		    var discount = parseFloat(sale.subtotal) + parseFloat(sale.tax) - parseFloat(sale.total);
                     for (var p in sale.payments) {
                         amount = parseFloat(sale.payments[p].amount);
                         method = sale.payments[p].method;
                         if (data.methodtotals.hasOwnProperty(method)) { // check if payment method field is alredy set
                             data.methodtotals[method].amount += amount;
+                            data.methodtotals[method].discount = discount;
                             data.methodtotals[method].qty++;
                         } else {
                             data.methodtotals[method] = {};
                             data.methodtotals[method].amount = amount;
+                            data.methodtotals[method].discount = discount;
                             data.methodtotals[method].qty = 1;
                             data.methodtotals[method].refamount = parseFloat(0);
                             data.methodtotals[method].refqty = 0;
@@ -200,6 +204,7 @@ function WPOSReports() {
         for (var x in data.methodtotals){
             data.methodtotals[x].amount = parseFloat(data.methodtotals[x].amount).toFixed(2);
             data.methodtotals[x].refamount = parseFloat(data.methodtotals[x].refamount).toFixed(2);
+            data.methodtotals[x].discount = parseFloat(data.methodtotals[x].discount).toFixed(2);
         }
         // calculate takings
         data.totaltakings = data.salestotal.toFixed(2) - data.refundtotal.toFixed(2);
@@ -358,10 +363,10 @@ function WPOSReports() {
     }
 
     this.generateTakingsReport = function () {
-        var html = reportheader("Takings Count Report") + '<table style="width:100%;" class="table table-stripped"><thead><tr><th>Method</th><th># Payments</th><th>Takings</th><th># Refunds</th><th>Refunds</th><th>Balance</th></tr></thead><tbody>';
+        var html = reportheader("Takings Count Report") + '<table style="width:100%;" class="table table-stripped"><thead><tr><th>Method</th><th># Payments</th><th>Takings</th><th># Refunds</th><th>Refunds</th><th>Balance</th><th>Discounts</th></tr></thead><tbody>';
         var methdenoms = curstats.methodtotals;
         for (var method in methdenoms) {
-            html += '<tr><td>' + WPOS.util.capFirstLetter(method) + '</td><td>' + methdenoms[method].qty + '</td><td>' + WPOS.util.currencyFormat(methdenoms[method].amount) + '</td><td>' + methdenoms[method].refqty + '</td><td>' + WPOS.util.currencyFormat(methdenoms[method].refamount) + '</td><td>' + WPOS.util.currencyFormat((parseFloat(methdenoms[method].amount) - parseFloat(methdenoms[method].refamount)).toFixed(2)) + '</td></tr>';
+            html += '<tr><td>' + WPOS.util.capFirstLetter(method) + '</td><td>' + methdenoms[method].qty + '</td><td>' + WPOS.util.currencyFormat(methdenoms[method].amount) + '</td><td>' + methdenoms[method].refqty + '</td><td>' + WPOS.util.currencyFormat(methdenoms[method].refamount) + '</td><td>' + WPOS.util.currencyFormat((parseFloat(methdenoms[method].amount) - parseFloat(methdenoms[method].refamount)).toFixed(2)) + '</td><td>' + WPOS.util.currencyFormat(methdenoms[method].discount) + '</td></tr>';
         }
         html += '</tbody></table>';
         // put into report window

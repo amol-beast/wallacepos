@@ -377,6 +377,25 @@ class WposTransactions {
 
     /**
      * Generate invoice for the specified transaction
+     */
+    public function generateStockTransferInvoice(){
+
+        $html = $this->generateStockTransferInvoiceHtml($_REQUEST['template']);
+        if (isset($_REQUEST['type']) && $_REQUEST['type']=="html"){
+            if (isset($_REQUEST['download']) && $_REQUEST['download']==1){
+                header("Content-Type: application/stream");
+                header('Content-Disposition: attachment; filename="Stock Transfer-'.date("dmYHis").'.html"');
+            }
+            echo($html);
+        } else {
+            $output = (isset($_REQUEST['download']) && $_REQUEST['download']==1)?2:1;
+            $this->convertToPdf($html, $output);
+        }
+        exit;
+    }
+
+    /**
+     * Generate invoice for the specified transaction
      * @param $result
      * @return mixed
      */
@@ -428,6 +447,19 @@ class WposTransactions {
         return $tempMdl->renderTemplate($template!=""?$template:$invval->defaulttemplate, $data);
     }
 
+    /**
+     * Generate invoice html
+     * @param string $template
+     * @return string
+     */
+    private function generateStockTransferInvoiceHtml($template=""){
+        $tempMdl = new WposTemplates();
+        $config = new WposAdminSettings();
+        $invval = $config->getSettingsObject("invoice");
+        $genval = $config->getSettingsObject("general");
+        $data = new WposTemplateData($this->data, ['general'=>$genval, 'invoice'=>$invval], false, true);
+        return $tempMdl->renderTemplate($template!=""?$template:$invval->defaulttemplate, $data);
+    }
     /**
      * Convert HTML to PDF
      * @param $html

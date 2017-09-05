@@ -62,6 +62,34 @@ function WPOSItems() {
         }
     };
 
+   this.getItemLocationQty = function(code,location){
+		return 10;
+   };
+/**
+     * Adds an item from a stock code
+     * @param {string} code
+     */
+    this.addStockTransferItemFromStockCode = function (code) {
+	// find the item id from the stock code index and use it to retrieve the record.
+    var item = WPOS.getItemsTable()[WPOS.getStockIndex()[code.toUpperCase()]];
+    if (item === null || item === undefined || item === "") {//ADAM: Should use triple equals
+        alert("Item not found"); }
+        else
+        {
+
+            var result = WPOS.sendJsonData("locationItemQty/get", JSON.stringify({
+                id: item.id,
+                locationid: WPOS.getConfigTable().locationid
+            }));
+            if (result[0] === null || result[0] === undefined || result[0] === "")
+                item.locationQty = 0;
+            else
+                item.locationQty = result[0]["stocklevel"];
+            $("#stockTransferCodeInput").val('');
+            // add the item
+            addStockTransferItem(item);
+        }
+    };
     /**
      *
      * @param {Number} id
@@ -75,7 +103,24 @@ function WPOSItems() {
             addItem(item);
         }
     };
-
+ /**
+     *
+     * @param {Number} id
+     */
+    this.addStockTransferItemFromId = function (id) {
+        var item = WPOS.getItemsTable()[id];
+        if (item === null) {
+            alert("Item not found");
+        } else {
+            // add the item
+            var result = WPOS.sendJsonData("locationItemQty/get", JSON.stringify({id: item.id, locationid: WPOS.getConfigTable().locationid}));
+            if (result[0] === null || result[0] === undefined || result[0] === "")
+                item.locationQty = 0;
+            else
+                item.locationQty = result[0]["stocklevel"];
+            addStockTransferItem(item);
+        }
+    };
     /**
      *
      * @param {String} query
@@ -181,6 +226,41 @@ function WPOSItems() {
         addItemRow(qty, name, unit, taxid, sitemid, data)
     };
 
+/**
+     * Adds a html row into the sales table, if sitem id is greater than 0, all fields that are filled are disabled to prevent modification.
+     * @param {Number} qty
+     * @param {String} name
+     * @param {String} unit
+     * @param {Number} taxid
+     * @param {Number} sitemid ; the stored item id to keep track of inventory sales
+     * @param data
+     */
+    function addStockTransferItemRow(qty,stockcode, name, locationQty, unit, sitemid, data) {
+        sitemid = (sitemid>0?sitemid:0);
+        var disable = (sitemid>0); // disable fields that are filled by the stored item
+        var disableprice = (sitemid>0 && WPOS.getConfigTable().pos.priceedit!="always");
+        var disabletax = (!WPOS.getConfigTable().pos.hasOwnProperty('taxedit') || WPOS.getConfigTable().pos.taxedit=='no');
+        var row = $('<tr class="item_row valid">' +
+            '<td><input class="itemid" type="hidden" value="' + sitemid + '" data-options=\''+JSON.stringify(data)+'\' /><input style="width:115px;" type="text" class="stockcode" disabled value="' + stockcode + '" /></td>' +
+            '<td><input '+((disable==true && name!="")?"disabled":"")+' style="width: 100%; min-width: 100px;" type="text" class="itemname" value="' + name + '" onChange="WPOS.sales.updateSalesTotal();" /><div class="itemmodtxt"></div></td>' +
+            '<td><input disabled style="max-width:50px;" type="text" class="locationQty" value="' + locationQty + '" /></td>' +
+	    '<td><input onChange="WPOS.sales.updateSalesTotal();" style="width:50px;" type="text" class="itemqty numpad" value="' + qty + '" /></td>'+            
+	    '<td><input style="max-width:50px;" type="text" class="itemUnitprice" value="' + unit +'" disabled /></td>' +
+	    '<td><input style="max-width:50px;" type="text" class="itemprice" value="0.00" disabled /></td>' +
+            '<td style="text-align: center;"><button class="btn btn-sm btn-danger" onclick="WPOS.items.removeItem($(this));">X</button></td>' +
+            '</tr>');
+        if (data.orderid) {
+            row.insertAfter("#order_row_"+data.orderid);
+        } else {
+            $("#stockTransferItemTable").append(row);
+        }
+        $('#items_contain').scrollTop(1E10);
+        // reinitialize keypad & field listeners
+        WPOS.initKeypad();
+    }
+    this.addItemStockTransferRow = function(qty, name, unit, taxid, sitemid, data){
+        addItemSTockTransferRow(qty, name, unit, taxid, sitemid, data)
+    };
     /**
      * Gets or generates the taxid select HTML depending on input
      * @param {Number} taxid
@@ -218,7 +298,39 @@ function WPOSItems() {
         $("#codeinput").val('');
         WPOS.sales.updateSalesTotal();
     }
+ /**
+     *
+     * @param {Object} item
+     */
+    function addStockTransferItem(item) {
+        // Item cost may be null if we're adding stored items that were created in a previous version, explicitly set the cost in this case.
+        if (!item.hasOwnProperty('cost')) item.cost = 0.00;
+        // TODO: remove last row from table if its invalid?
+        // check if a priced item is already present in the sale and if so increment it's qty
+             if (!isStockTransferItemAdded(item.id, true)){
+                // insert item into table
+                addStockTransferItemRow(1,item.code, item.name, item.locationQty, item.price, item.id, {desc:item.description, hsncode:item.hsncode, cost:item.cost, unit_original:item.price, alt_name:item.alt_name});
+            }
 
+        $("#stockTransferCodeInput").val('');
+        WPOS.sales.updateSalesTotal();
+    }
+	
+	function isStockTransferItemAdded(itemid, addqty){
+        var found = false;
+        $("#stockTransferItemTable").children().each(function(index, element) {
+            var itemfield = $(element).find(".itemid");
+            //console.log(itemfield);
+            if (itemfield.val()==itemid){
+                //console.log("foung");
+                if (addqty) $(element).find(".itemqty").val(parseInt($(element).find(".itemqty").val())+1);
+                found = true;
+                return true;
+            }
+            return true;
+        });
+        return found;
+    }
     function isItemAdded(itemid, addqty){
         var found = false;
         $("#itemtable").children(".valid").each(function(index, element) {
@@ -481,7 +593,25 @@ $(function () {
             return false;
         }
     });
-
+    $("#stockTransferItemSearch").autocomplete({
+        source: function (request, response) {
+            response(WPOS.items.searchItems(request.term));
+        },
+        search: function () {
+            // custom minLength
+            var term = this.value;
+            return term.length >= 2;
+        },
+        focus : function () {
+            // prevent value inserted on focus
+            return false;
+        },
+        select: function (event, ui) {
+            WPOS.items.addStockTransferItemFromId(ui.item.id);
+            this.value = "";
+            return false;
+        }
+    });
     $("#custemail").autocomplete({
         source: function (request, response) {
             response(WPOS.items.searchCustomers(request.term));
@@ -583,7 +713,28 @@ function WPOSSales() {
         $("#totaltax").text(WPOS.util.currencyFormat(curtaxtotal.toFixed(2)));
         this.updateDiscount();
     };
-
+    this.updateStockTransferTotal = function () {
+        var total = 0.00;
+        var tempprice = 0.00;
+        curtaxtotal = 0.00; // clear last tax
+        // validate records, marks valid records to be used in sale and informs user of invalid records
+        // It also calculates item total and checks that its a correct result
+        validateStockTransferItems();
+        // cycle through valid records and add item total to the sales total
+        var temptax;
+        $("#stockTransferItemTable").children('.valid').each(function (index, element) {
+                // get item total
+                tempprice = parseFloat($(element).find(".itemprice").val());
+                // add to total
+                total += tempprice;
+                // get tax amount included with each item
+                
+        });
+        // remove cur tax from the total and we have our subtotal
+        curtotal = total;
+        cursubtotal = (total - curtaxtotal);
+        $("#subtotal").text(WPOS.util.currencyFormat(cursubtotal.toFixed(2)));
+    };
     /**
      *
      */
@@ -697,7 +848,6 @@ function WPOSSales() {
             clearSalesForm();
         }
     };
-
     this.resetSalesForm = function(){
         clearSalesForm();
     };
@@ -742,6 +892,47 @@ function WPOSSales() {
 
     function getNumSalesItems(){
         return $("#itemtable").children(".valid").length;
+    }
+    function getNumStockTransferItems(){
+        return $("#stockTransferItemTable").children().length;
+    }
+
+    function validateStockTransferItems(){
+        var qty,name, unit, mod, tempprice, tempcost;
+        var numinvalid = 0;
+        var allow_negative = WPOS.getConfigTable().pos.negative_items;
+        $("#stockTransferItemTable").children(".item_row").each(function (index, element) {
+                qty = parseFloat($(element).find(".itemqty").val());
+                name = $(element).find(".itemname").val();
+                unit = parseFloat($(element).find(".itemUnitprice").val());
+                //var itemdata = $(element).find(".itemid").data('options');
+                //mod = itemdata.hasOwnProperty('mod') ? itemdata.mod.total : 0;
+                tempprice = parseFloat("0.00");
+                if (qty > 0 && name != "" && (unit>0 || allow_negative)) {
+                    // add item modification total to unit price & calculate item total
+                    tempprice = qty * (unit);
+                    tempcost = qty * itemdata.cost;
+                    // calculate item tax
+                    $(element).find(".itemprice").val(tempprice.toFixed(2));
+                    // valid item; mark as valid, remove ui indicator class
+                    $(element).addClass("valid");
+                    $(element).removeClass("danger");
+                } else {
+                    // not a valid record
+                    $(element).removeClass("valid");
+                    $(element).addClass("danger");
+                    // something is null, set price to 0
+                    $(element).find(".itemprice").val("0.00");
+                    // increment number invalid
+                    numinvalid++;
+                }
+        });
+        // show warning if items invalid
+        if (numinvalid>0){
+            $("#invaliditemnotice").show();
+        } else {
+            $("#invaliditemnotice").hide();
+        }
     }
 
     function validateSalesItems(){
@@ -802,6 +993,66 @@ function WPOSSales() {
             $("#paymentsdiv").dialog('open');
             $("#endsalebtn").prop("disabled", false); // make sure the damn button is active, dunno why but when the page reloads it seems to keep its state.
         } else {
+            alert("Please add some valid items to the sale before proceeding!");
+        }
+    };
+    this.showStockTransferDialog = function () {
+        if (getNumStockTransferItems()){
+            var response = confirm("Confirm Stock Transfer?");
+            if(!response)
+                return;
+            else
+            {
+                var item=[];
+                var data=[];
+                $("#stockTransferItemTable").children().each(function(index, element) {
+                    console.log(index);
+                    var locationid = WPOS.getConfigTable().locationid;
+                    var sourceLocation = WPOS.getConfigTable().locationname;
+                    var newLocationid = $("#transferLocation").val();
+                    var newLocation = $("#transferLocation :selected").text();
+                    var itemid = $(element).find(".itemid").val();
+                    var itemQty = $(element).find(".itemqty").val();
+                    var stockCode = $(element).find(".stockcode").val();
+                    var unitPrice = $(element).find(".itemUnitprice").val();
+                    var itemName = $(element).find(".itemname").val();
+
+                    data.push({sourceLocation: sourceLocation, newLocation: newLocation, storeditemid: itemid, amount:itemQty, stockCode:stockCode, unitPrice:unitPrice,item:itemName});
+                    item.push({locationid: locationid, newlocationid: newLocationid, storeditemid: itemid, amount:itemQty});
+                });
+                var response = WPOS.sendJsonData("stock/transferMultiple", JSON.stringify(item));
+                var link = "/api/stock/transferMultiple/generateInvoice&type=html&template=invoice";
+                var form = document.createElement("form");
+                form.setAttribute("method", "post");
+                form.setAttribute("action", link);
+                form.setAttribute("target", "view");
+
+                var hiddenField = document.createElement("input");
+                hiddenField.setAttribute("type", "hidden");
+                hiddenField.setAttribute("name", "data");
+                hiddenField.setAttribute("value", item);
+                form.appendChild(hiddenField);
+                document.body.appendChild(form);
+
+                var response = $.ajax({
+                    url     : link,
+                    type    : "POST",
+                    data    : {data: JSON.stringify(data)},
+                    dataType: "text",
+                    timeout : 10000,
+                    cache   : false,
+                    async   : false
+                });
+                var x=window.open();
+                x.document.open();
+                x.document.write(response.responseText);
+                x.document.close();
+                //Clears the Stock Transfer Page
+                initStockTransfer();
+                $("#stockTransferItemTable").html('');
+                $("#invaliditemnotice").hide();
+
+        } }else {
             alert("Please add some valid items to the sale before proceeding!");
         }
     };
