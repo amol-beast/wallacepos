@@ -188,7 +188,7 @@ function WPOSReports() {
                         method = sale.payments[p].method;
                         if (data.methodtotals.hasOwnProperty(method)) { // check if payment method field is alredy set
                             data.methodtotals[method].amount += amount;
-                            data.methodtotals[method].discount = discount;
+                            data.methodtotals[method].discount += discount;
                             data.methodtotals[method].qty++;
                         } else {
                             data.methodtotals[method] = {};
