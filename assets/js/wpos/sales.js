@@ -209,8 +209,8 @@ function WPOSItems() {
                 '<h6>(' +temp_categories[i].numitems+' items)</h6>'+
                 '</div>');
         }
-        var misctotal = temp_categories.hasOwnProperty(0)?catindex[0].numitems:0;
-        iboxitems.append('<div class="iboxitem" onclick="WPOS.items.generateItemGrid(0);"><h5>Miscellaneous</h5><h6>('+misctotal+' items)</h6></div>');
+        //var misctotal = temp_categories.hasOwnProperty(0)?catindex[0].numitems:0;
+        //iboxitems.append('<div class="iboxitem" onclick="WPOS.items.generateItemGrid(0);"><h5>Miscellaneous</h5><h6>('+misctotal+' items)</h6></div>');
     };
 
     /**
