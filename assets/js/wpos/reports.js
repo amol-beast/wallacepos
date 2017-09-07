@@ -23,6 +23,7 @@
 function WPOSReports() {
     // Overview
     this.populateOverview = function () {
+        console.log("populate Overview called");
         var stats = getOverviewStats();
         // Fill UI
         $("#rsalesnum").text(stats.salesnum);
@@ -129,6 +130,7 @@ function WPOSReports() {
     }
 
     function getOverviewStats() {
+        console.log("Overview stats called");
         var sales = getTodaysRecords(true);
         var sale;
         var emptfloat = parseFloat("0.00");
@@ -156,23 +158,32 @@ function WPOSReports() {
                     break;
                 case 3:
                     // cycle though all refunds and add to total
+                    console.log("case 3 sale data");
+                    console.log(sale);
+                    console.log("case 3 refund data");
+                    console.log(sale.refunddata);
                     for (var i in sale.refunddata) {
                         amount = parseFloat(sale.refunddata[i].amount);
                         method = sale.refunddata[i].method;
                         data.refundnum++;
                         data.refundtotal += amount;
-		        var discount = sale.subtotal + sale.tax - sale.total;
+		                var discount = parseFloat(sale.subtotal) + parseFloat(sale.tax) - parseFloat(amount);
+		                console.log("discount:"+ discount);
                         // add payment type totals
                         if (data.methodtotals.hasOwnProperty(method)) { // check if payment method field is alredy set
                             data.methodtotals[method].refamount += amount;
+                            data.methodtotals[method].discount -= discount;
                             data.methodtotals[method].refqty++;
                         } else {
                             data.methodtotals[method] = {};
                             data.methodtotals[method].refamount = amount;
                             data.methodtotals[method].refqty = 1;
+                            data.methodtotals[method].discount = 0;
                             data.methodtotals[method].amount = parseFloat(0);
                             data.methodtotals[method].qty = 0;
                         }
+                        console.log("methdtotals discount:");
+                        console.log(data.methodtotals);
                     }
                     // count refund as a sale, but only if it was sold today
                     if (sale.processdt < stime || sale.processdt > etime) {
@@ -182,11 +193,14 @@ function WPOSReports() {
                     data.salesnum++;
                     data.salestotal += parseFloat(sale.total);
                     // calc payment methods
-		    var discount = parseFloat(sale.subtotal) + parseFloat(sale.tax) - parseFloat(sale.total);
+                    console.log("case 1 sale data");
+                    console.log(sale);
+		            var discount = parseFloat(sale.subtotal) + parseFloat(sale.tax) - parseFloat(sale.total);
+                    console.log("discount:"+ discount);
                     for (var p in sale.payments) {
                         amount = parseFloat(sale.payments[p].amount);
                         method = sale.payments[p].method;
-                        if (data.methodtotals.hasOwnProperty(method)) { // check if payment method field is alredy set
+                        if (data.methodtotals.hasOwnProperty(method)) { // check if payment method field is already set
                             data.methodtotals[method].amount += amount;
                             data.methodtotals[method].discount += discount;
                             data.methodtotals[method].qty++;
@@ -199,6 +213,8 @@ function WPOSReports() {
                             data.methodtotals[method].refqty = 0;
                         }
                     }
+                    console.log("methdtotals discount:");
+                    console.log(data.methodtotals);
             }
         }
         for (var x in data.methodtotals){
