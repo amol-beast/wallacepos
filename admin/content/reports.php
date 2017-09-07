@@ -29,6 +29,15 @@
         <label>Range: <input type="text" style="width: 85px;" id="repstime" onclick="$(this).blur();" /></label>
         <label>to <input type="text" style="width: 85px;" id="repetime" onclick="$(this).blur();" /></label>
     </div>
+    <div style="display: inline-block; vertical-align:middle; margin-right: 20px;">
+        <label>Location:
+            <select id="repLocation" onchange="generateReport();" style="vertical-align: middle; margin-right: 20px; margin-bottom: 5px;">
+                <option value="all" selected="selected">All Locations</option>
+
+            </select>
+        </label>
+
+    </div>
     <div style="display: inline-block; vertical-align: top;">
         <button onclick="printCurrentReport();" class="btn btn-primary btn-sm"><i class="icon-print align-top bigger-125"></i>Print</button>&nbsp;
         <button class="btn btn-success btn-sm" onclick="exportCurrentReport();"><i class="icon-cloud-download align-top bigger-125"></i>Export CSV</button>
@@ -48,14 +57,34 @@
     var repdata;
     var etime;
     var stime;
-
+    var globalLocations=null;
+    function initLocationsDropDown()
+    {
+        console.log("initLocationsDropDown");
+        var locations = null;
+        // To save json call everytime drop down is changed
+        if(globalLocations == null) {
+            locations = WPOS.sendJsonData("locations/get", "");
+            globalLocations = locations;
+        }
+        else {
+            locations = globalLocations;
+        }
+        var html ="";
+        for (var i in locations)
+        {
+            html += '<option value="' + locations[i].id + '">'+ locations[i].name+'</option>'
+        }
+        $("#repLocation").append(html);
+    }
     // Generate report
     function generateReport(){
         // show loader
         WPOS.util.showLoader();
+        initLocationsDropDown();
         var type = $("#reptype").val();
         // load the data
-        repdata = WPOS.sendJsonData(type, JSON.stringify({"stime":stime, "etime":etime, "type":$("#reptranstype").val()}));
+        repdata = WPOS.sendJsonData(type, JSON.stringify({"stime":stime, "etime":etime, "type":$("#reptranstype").val(), "location": $("#repLocation").text()}));
         // populate the report using the correct function
         switch (type){
             case "stats/general":

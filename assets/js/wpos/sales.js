@@ -158,8 +158,21 @@ function WPOSItems() {
                 var index = WPOS.getCategoryIndex()[categoryId];
                 var tempitems = WPOS.getItemsTable();
                 for (var x = 0; x < index.length; x++) {
+                    //console.log(tempitems[index[x]]);
                     items[index[x]] = tempitems[index[x]];
                 }
+                items.sort(function(a,b) {
+                    if(a.name == b.name)
+                    {
+                        return ((parseFloat(a.price) >= parseFloat(b.price))?1:0);
+                    }
+                    else if (a.name>b.name)
+                    {
+                        return 1;
+                    }
+                    else
+                        return -1;
+                });
             }
         } else {
             items = WPOS.getItemsTable();
@@ -179,14 +192,24 @@ function WPOSItems() {
         iboxitems.html('<div class="iboxitem" onclick="WPOS.items.generateItemGrid(-1);"><h5>All Categories</h5><h6>('+Object.keys(WPOS.getItemsTable()).length+' items)</h6></div>');
         var catindex = WPOS.getCategoryIndex();
         var categories = WPOS.getConfigTable().item_categories;
+		var temp_categories = [];
+	    for (var i in categories){
+	    temp_categories[i]={};
+	    temp_categories[i].id = categories[i].id;
+	    temp_categories[i].name = categories[i].name;
+	    temp_categories[i].dt = categories[i].dt;
+	    temp_categories[i].numitems = categories[i].numitems;
+            }
+        temp_categories.sort(function(a,b) {return (a.name.toUpperCase() > b.name.toUpperCase()) ? 1 : (( b.name.toUpperCase() > a.name.toUpperCase()) ? -1 : 0);});
         //console.log(catindex);
-        for (var i in categories){
-            iboxitems.append('<div class="iboxitem" onclick="WPOS.items.generateItemGrid('+i+');">' +
-                '<h5>'+categories[i].name+'</h5>'+
-                '<h6>('+(catindex.hasOwnProperty(i)?catindex[i].length:0)+' items)</h6>'+
+
+        for (var i in temp_categories){
+            iboxitems.append('<div class="iboxitem" onclick="WPOS.items.generateItemGrid('+temp_categories[i].id+');">' +
+                '<h5>'+temp_categories[i].name+'</h5>'+
+                '<h6>(' +temp_categories[i].numitems+' items)</h6>'+
                 '</div>');
         }
-        var misctotal = catindex.hasOwnProperty(0)?catindex[0].length:0;
+        var misctotal = temp_categories.hasOwnProperty(0)?catindex[0].length:0;
         iboxitems.append('<div class="iboxitem" onclick="WPOS.items.generateItemGrid(0);"><h5>Miscellaneous</h5><h6>('+misctotal+' items)</h6></div>');
     };
 
@@ -571,7 +594,7 @@ function WPOSItems() {
 // Item UI stuff
 $(function () {
     $.ui.autocomplete.prototype._renderItem = function (ul, item) {
-        return $("<li>").data("ui-autocomplete-item", item).append("<a>" + (item.email!=undefined?item.email:item.name) + "</a>").appendTo(ul);
+        return $("<li>").data("ui-autocomplete-item", item).append("<a>" + (item.email!=undefined?item.email:item.name) + "&nbsp;&nbsp;&nbsp;<b>" +WPOS.util.currencyFormat(item.price) + "</b></a>").appendTo(ul);
     };
 
     $("#itemsearch").autocomplete({

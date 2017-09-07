@@ -22,6 +22,7 @@
 
 function WPOSReports() {
     // Overview
+
     this.populateOverview = function () {
         console.log("populate Overview called");
         var stats = getOverviewStats();
@@ -33,12 +34,26 @@ function WPOSReports() {
         $("#rvoidsnum").text(stats.voidnum);
         $("#rvoidstotal").text(WPOS.util.currencyFormat(stats.voidtotal.toFixed(2)));
         $("#rtotaltakings").text(WPOS.util.currencyFormat(stats.totaltakings.toFixed(2)));
-
+        initCashReconciliation();
         showAdditionalReports();
         // generate takings report
         this.generateTakingsReport();
     };
-
+    function initCashReconciliation()
+    {
+        console.log("initCashReconciliation Called");
+        $("#display2000").text(WPOS.util.currencyFormat("2000"));
+        $("#display1000").text(WPOS.util.currencyFormat("1000"));
+        $("#display500").text(WPOS.util.currencyFormat("500"));
+        $("#display200").text(WPOS.util.currencyFormat("200"));
+        $("#display100").text(WPOS.util.currencyFormat("100"));
+        $("#display50").text(WPOS.util.currencyFormat("50"));
+        $("#display20").text(WPOS.util.currencyFormat("20"));
+        $("#display10").text(WPOS.util.currencyFormat("10"));
+        $("#display5").text(WPOS.util.currencyFormat("5"));
+        $("#display2").text(WPOS.util.currencyFormat("2"));
+        $("#display1").text(WPOS.util.currencyFormat("1"));
+    }
     function showAdditionalReports(){
         // show eftpos reports if available
         if (WPOS.hasOwnProperty('eftpos') && WPOS.eftpos.isEnabledAndReady() && WPOS.eftpos.getType()=="tyro"){
@@ -49,8 +64,14 @@ function WPOSReports() {
     }
 
     this.calcReconcil = function () {
+        console.log("calcReconcil called");
+        console.log("Current Cash Takings:" + curcashtakings);
         var calcedtakings;
         var balance;
+        var recdom2000 = parseFloat($("#recdenom2000").val()) * 2000;
+        var recdom1000 = parseFloat($("#recdenom1000").val()) * 1000;
+        var recdom500 = parseFloat($("#recdenom500").val()) * 500;
+        var recdom200 = parseFloat($("#recdenom200").val()) * 200;
         var recdom100 = parseFloat($("#recdenom100").val()) * 100;
         var recdom50 = parseFloat($("#recdenom50").val()) * 50;
         var recdom20 = parseFloat($("#recdenom20").val()) * 20;
@@ -58,15 +79,17 @@ function WPOSReports() {
         var recdom5 = parseFloat($("#recdenom5").val()) * 5;
         var recdom2 = parseFloat($("#recdenom2").val()) * 2;
         var recdom1 = parseFloat($("#recdenom1").val());
+        /*
         var recdom50c = $("#recdenom50c").val() * 0.5;
         var recdom20c = $("#recdenom20c").val() * 0.2;
         var recdom10c = $("#recdenom10c").val() * 0.1;
         var recdom5c = $("#recdenom5c").val() * 0.05;
         var recfloat = parseFloat($("#recfloat").val());
+        */
         var rectakings = $("#rectakings");
         var recbalance = $("#recbalance");
 
-        calcedtakings = (recdom100 + recdom50 + recdom20 + recdom10 + recdom5 + recdom2 + recdom1 + recdom50c + recdom20c + recdom10c + recdom5c) - recfloat;
+        calcedtakings = (recdom2000 + recdom1000 + recdom500 + recdom200 + recdom100 + recdom50 + recdom20 + recdom10 + recdom5 + recdom2 + recdom1 );//+ recdom50c + recdom20c + recdom10c + recdom5c);// - recfloat;
         calcedtakings = calcedtakings.toFixed(2);
         balance = (calcedtakings - curcashtakings).toFixed(2);
         $(rectakings).text(WPOS.util.currencyFormat(calcedtakings));

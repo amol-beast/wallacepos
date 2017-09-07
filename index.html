@@ -91,7 +91,7 @@
                         </div>
                         &nbsp;&nbsp;
                         <div class="inline">
-                            <label><div class="hlabel inline">Stock Search:&nbsp;</div><input id="itemsearch" type="text"/></label>
+                            <label><div class="hlabel inline">Stock Search:&nbsp;</div><input id="itemsearch" type="text" size="30"/></label>
                         </div>
                     </div>
                     <div class="wscan-btn inline" style="display: none !important;">
@@ -404,29 +404,42 @@
                 <table class="table">
                     <tbody>
                     <tr>
-                        <td style="text-align: right;">$100:</td>
+                        <td style="text-align: right;" id="display2000"></td>
+                        <td><input onchange="WPOS.reports.calcReconcil();" type="text" size="4" id="recdenom2000" value="0"/></td>
+                        <td style="text-align: right;" id="display1000" ></td>
+                        <td><input onchange="WPOS.reports.calcReconcil();" type="text" size="4" id="recdenom1000" value="0"/></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right;" id="display500"></td>
+                        <td><input onchange="WPOS.reports.calcReconcil();" type="text" size="4" id="recdenom500" value="0"/></td>
+                        <td style="text-align: right;" id="display200"></td>
+                        <td><input onchange="WPOS.reports.calcReconcil();" type="text" size="4" id="recdenom200" value="0"/></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right;" id="display100"></td>
                         <td><input onchange="WPOS.reports.calcReconcil();" type="text" size="4" id="recdenom100" value="0"/></td>
-                        <td style="text-align: right;">$50:</td>
+                        <td style="text-align: right;" id="display50"></td>
                         <td><input onchange="WPOS.reports.calcReconcil();" type="text" size="4" id="recdenom50" value="0"/></td>
                     </tr>
                     <tr>
-                        <td style="text-align: right;">$20:</td>
+                        <td style="text-align: right;" id="display20"></td>
                         <td><input onchange="WPOS.reports.calcReconcil();" type="text" size="4" id="recdenom20" value="0"/></td>
-                        <td style="text-align: right;">$10:</td>
+                        <td style="text-align: right;" id="display10"></td>
                         <td><input onchange="WPOS.reports.calcReconcil();" type="text" size="4" id="recdenom10" value="0"/></td>
                     </tr>
                     <tr>
-                        <td style="text-align: right;">$5:</td>
+                        <td style="text-align: right;" id="display5"></td>
                         <td><input onchange="WPOS.reports.calcReconcil();" type="text" size="4" id="recdenom5" value="0"/></td>
-                        <td style="text-align: right;">$2:</td>
+                        <td style="text-align: right;" id="display2"></td>
                         <td><input onchange="WPOS.reports.calcReconcil();" type="text" size="4" id="recdenom2" value="0"/></td>
                     </tr>
                     <tr>
-                        <td style="text-align: right;">$1:</td>
+                        <td style="text-align: right;" id="display1"></td>
                         <td><input onchange="WPOS.reports.calcReconcil();" type="text" size="4" id="recdenom1" value="0"/></td>
-                        <td style="text-align: right;">50c:</td>
-                        <td><input onchange="WPOS.reports.calcReconcil();" type="text" size="4" id="recdenom50c" value="0"/></td>
+                        <!--<td style="text-align: right;">50c:</td>
+                        <td><input onchange="WPOS.reports.calcReconcil();" type="text" size="4" id="recdenom50c" value="0"/></td>-->
                     </tr>
+                    <!--
                     <tr>
                         <td style="text-align: right;">20c:</td>
                         <td><input onchange="WPOS.reports.calcReconcil();" type="text" size="4" id="recdenom20c" value="0"/></td>
@@ -439,6 +452,7 @@
                         <td style="text-align: right;">Float:</td>
                         <td><input onchange="WPOS.reports.calcReconcil();" type="text" size="4" id="recfloat" value="0"/></td>
                     </tr>
+                    -->
                     <tr>
                         <td colspan="2" style="text-align: right;">Takings - Float:</td>
                         <td colspan="2"><span id="rectakings"></span></td>
