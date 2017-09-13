@@ -107,6 +107,7 @@
                         <th>Name</th>
                         <th>Unit</th>
                         <th>Options</th>
+                        <th>Discount</th>
                         <th>Tax</th>
                         <th>Price</th>
                         <th style="text-align: center;">X</th>
@@ -132,8 +133,12 @@
                             <div class="totalsval"><span id="subtotal">$0.00</span></div>
                         </div>
                         <div>
-                            <div class="totalslabel">Discount:</div>
-                            <div class="totalsval"><input onChange="WPOS.sales.updateDiscount();" size="2" id="salediscount" type="text" class="numpad" value="0" autocomplete="off"/><strong>%</strong>&nbsp;<span id="discounttxt">($0.00)</span></div>
+                            <div class="totalslabel">Discount:</div><input id="totalDiscountVal" type="hidden" value=""/><input id="totalDiscountPercent" type="hidden" value=""/>
+                            <div class="totalsval"><div id="calculatedDiscount"></div><span id="discounttxt">0% ($0.00)</span> &nbsp;&nbsp;&nbsp;&nbsp;</div>
+                            <button class="btn btn-xs btn-primary field-button field-button-attach" onclick="WPOS.sales.updateAllItemsDiscount()">
+                            Apply Discount to all
+                            </button>
+                            <input size="2" id="salediscount" type="text" class="numpad" value="0" autocomplete="off"/>
                         </div>
                     </div>
                     <div class="totalsbox">
@@ -1153,6 +1158,7 @@
                             <th>Name</th>
                             <th>Unit</th>
                             <th>Tax</th>
+                            <th>Discount</th>
                             <th>Price</th>
                             <th></th>
                         </tr>

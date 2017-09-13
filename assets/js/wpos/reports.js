@@ -190,7 +190,8 @@ function WPOSReports() {
                         method = sale.refunddata[i].method;
                         data.refundnum++;
                         data.refundtotal += amount;
-		                var discount = parseFloat(sale.subtotal) + parseFloat(sale.tax) - parseFloat(amount);
+		                //var discount = parseFloat(sale.subtotal) + parseFloat(sale.tax) - parseFloat(amount);
+                        var discount = sale.discountval;
 		                console.log("discount:"+ discount);
                         // add payment type totals
                         if (data.methodtotals.hasOwnProperty(method)) { // check if payment method field is alredy set
@@ -218,8 +219,9 @@ function WPOSReports() {
                     // calc payment methods
                     console.log("case 1 sale data");
                     console.log(sale);
-		            var discount = parseFloat(sale.subtotal) + parseFloat(sale.tax) - parseFloat(sale.total);
-                    console.log("discount:"+ discount);
+		            var discount = sale.discountval;
+
+			        console.log("discount:"+ discount);
                     for (var p in sale.payments) {
                         amount = parseFloat(sale.payments[p].amount);
                         method = sale.payments[p].method;

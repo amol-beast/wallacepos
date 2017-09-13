@@ -191,8 +191,9 @@ function WPOSTransactions() {
 
         $("#transsubtotal").text(WPOS.util.currencyFormat(record.subtotal));
         populateTaxinfo(record);
-        if (record.discount>0){
-            $("#transdiscount").text(record.discount+"% ("+WPOS.util.currencyFormat((parseFloat(record.total)-Math.abs(parseFloat(record.subtotal)+parseFloat(record.tax))).toFixed(2))+')');
+    	if (record.discount>0){
+            //$("#transdiscount").text(record.discount+"% ("+WPOS.util.currencyFormat((parseFloat(record.total)-Math.abs(parseFloat(record.subtotal)+parseFloat(record.tax))).toFixed(2))+')');
+            $("#transdiscount").text(record.discount+"% ("+WPOS.util.currencyFormat((parseFloat(record.discountval))) + ")");
             $("#transdisdiv").show();
         } else {
             $("#transdisdiv").hide();
@@ -255,7 +256,8 @@ function WPOSTransactions() {
                     modStr+= '<br/>'+(mod.hasOwnProperty('qty')?(mod.qty>0?'+ ':'')+mod.qty:'')+' '+mod.name+(mod.hasOwnProperty('value')?': '+mod.value:'')+' ('+WPOS.util.currencyFormat(mod.price)+')';
                 }
             }
-            $(itemtable).append('<tr><td>'+items[i].qty+'</td><td>'+items[i].name+modStr+'</td><td>'+WPOS.util.currencyFormat(items[i].unit)+'</td><td>'+taxStr+'</td><td>'+WPOS.util.currencyFormat(items[i].price)+'</td></tr>');
+            $(itemtable).append('<tr><td>' + items[i].qty + '</td><td>' + items[i].name + modStr + '</td><td>' + WPOS.util.currencyFormat(items[i].unit) + '</td><td>' + taxStr + '</td><td>' + items[i].discount +'%('+ WPOS.util.currencyFormat(items[i].discountval)+')</td><td>' + WPOS.util.currencyFormat(items[i].price) + '</td></tr>');
+	        //$(itemtable).append('<tr><td>'+items[i].qty+'</td><td>'+items[i].name+modStr+'</td><td>'+WPOS.util.currencyFormat(items[i].unit)+'</td><td>'+taxStr+'</td><td>'+WPOS.util.currencyFormat(items[i].price)+'</td></tr>');
         }
     }
 

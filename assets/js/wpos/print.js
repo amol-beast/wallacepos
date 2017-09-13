@@ -1156,6 +1156,7 @@ function WPOSPrint(kitchenMode) {
             sale_items: record.items,
             sale_numitems: record.numitems,
             sale_discount: parseFloat(record.discount),
+            sale_discountval: parseFloat(record.discountval),
             sale_discountamt: WPOS.util.currencyFormat(Math.abs(parseFloat(record.total) - (parseFloat(record.subtotal) + parseFloat(record.tax))).toFixed(2)),
             sale_subtotal: record.subtotal,
             sale_total: record.total,
@@ -1196,11 +1197,16 @@ function WPOSPrint(kitchenMode) {
             }
             taxName = WPOS.getTaxTable().items[taxitemid].name;
             if(taxVal[taxName] == null) {
-                taxVal[taxName]= new Array();
-                taxVal[taxName]["value"] = 0.0;
-                taxVal[taxName]["taxable"] = 0.0;
+                taxVal[taxName]= [];
+                taxVal[taxName]["total"] = parseFloat("0.0");
+                taxVal[taxName]["taxable"] = parseFloat("0.0");
+                taxVal[taxName]["sale_value"] = parseFloat("0.0");
+                taxVal[taxName]["discount"] = parseFloat("0.0");
             }
-            taxVal[taxName]["taxable"] += temp_data.sale_items[i].price;
+            taxVal[taxName]["taxable"] += parseFloat(temp_data.sale_items[i].price) - parseFloat(temp_data.sale_items[i].tax["total"]);
+            taxVal[taxName]["discount"] += parseFloat(temp_data.sale_items[i].discountval);
+            taxVal[taxName]["total"] += parseFloat(temp_data.sale_items[i].tax["total"]);
+            taxVal[taxName]["sale_value"] += parseFloat(temp_data.sale_items[i].price) - parseFloat(temp_data.sale_items[i].tax["total"]) + parseFloat(temp_data.sale_items[i].discountval);
 
 			var line=0;
 			if(temp_data.sale_items[i].name.length>10)
@@ -1224,6 +1230,8 @@ function WPOSPrint(kitchenMode) {
         console.log("gsttax:");
         console.log(temp_data);
 
+        console.log("taxval:");
+        console.log(taxVal);
         console.log("print.js record items");
         console.log(record.items);
         // format tax data
@@ -1232,6 +1240,7 @@ function WPOSPrint(kitchenMode) {
         temp_data.sale_tax = [];
 
         var taxSum =0;
+        /*
         for (var i in record.taxdata) {
             tax = WPOS.getTaxTable().items[i];
             var label = tax.name + ' (' + tax.value + '%)';
@@ -1243,12 +1252,19 @@ function WPOSPrint(kitchenMode) {
             var alttaxlabel = (tax.altname!=""?tax.altname:tax.name) + ' (' + tax.value + '%)';
             temp_data.sale_tax.push({label: label, altlabel: alttaxlabel, value: WPOS.util.currencyFormat(record.taxdata[i])});
             taxSum += parseFloat(record.taxdata[i]);
-        }
+        }*/
         console.log("taxval");
         console.log(taxVal);
         console.log("taxsum");
         console.log(temp_data.sale_tax);
         console.log(taxSum);
+        temp_data.gst_breakup = [];
+        for (var gst in taxVal) {
+            temp_data.gst_breakup.push({gst: gst, sale_value : taxVal[gst]["sale_value"], discount: taxVal[gst]["discount"], taxable: taxVal[gst]["taxable"], total: taxVal[gst]["total"] });
+            taxSum += taxVal[gst]["total"];
+        }
+        console.log(temp_data);
+        //temp_data.gst_breakup = taxVal;
         temp_data.taxsum = taxSum;
         temp_data.cgst = taxSum/2;
         temp_data.sgst = taxSum/2;

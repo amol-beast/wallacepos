@@ -228,13 +228,16 @@ function WPOSItems() {
         var disableprice = (sitemid>0 && WPOS.getConfigTable().pos.priceedit!="always");
         var disabletax = (!WPOS.getConfigTable().pos.hasOwnProperty('taxedit') || WPOS.getConfigTable().pos.taxedit=='no');
         var row = $('<tr class="item_row">' +
-            '<td><input class="itemid" type="hidden" value="' + sitemid + '" data-options=\''+JSON.stringify(data)+'\' /><input onChange="WPOS.sales.updateSalesTotal();" style="width:50px;" type="text" class="itemqty numpad" value="' + qty + '" /></td>' +
+            '<td><input class="itemid" type="hidden" value="' + sitemid + '" data-options=\''+JSON.stringify(data)+'\' /><input type="hidden" class="itemdiscountVal" value=""/> <input onChange="WPOS.sales.updateSalesTotal();" style="width:50px;" type="text" class="itemqty numpad" value="' + qty + '" /></td>' +
             '<td><input '+((disable==true && name!="")?"disabled":"")+' style="width: 100%; min-width: 100px;" type="text" class="itemname" value="' + name + '" onChange="WPOS.sales.updateSalesTotal();" /><div class="itemmodtxt"></div></td>' +
+            
             '<td><input '+((disableprice==true && unit!="")?"disabled":"")+' onChange="WPOS.sales.updateSalesTotal();" style="max-width:50px;" type="text" class="itemunit numpad" value="' + unit + '" /></td>' +
             '<td><button onclick="WPOS.items.openItemModDialog(this);" class="btn btn-primary btn-xs"><i class="icon-list-ul"></i></button><div class="itemmodtext"></div></td>' +
+            '<td><input style="max-width:50px;" type="text" class="itemdiscount numpad" value="0.00" onChange="WPOS.sales.updateSalesTotal();" /></td>' +
             '<td><select '+((disabletax==true && taxid!=null)?"disabled":"")+' onChange="WPOS.sales.updateSalesTotal();" style="max-width:110px;" class="itemtax">' +getTaxSelectHTML(taxid)+ '</select><input class="itemtaxval" type="hidden" value="0.00" /></td>' +
             '<td><input style="max-width:50px;" type="text" class="itemprice" value="0.00" disabled /></td>' +
             '<td style="text-align: center;"><button class="btn btn-sm btn-danger" onclick="WPOS.items.removeItem($(this));">X</button></td>' +
+            '<input type="hidden" class="itemdiscountVal" value=""/>' +
             '</tr>');
         if (data.orderid) {
             row.insertAfter("#order_row_"+data.orderid);
@@ -712,29 +715,51 @@ function WPOSSales() {
      *
      */
     this.updateSalesTotal = function () {
-        var total = 0.00;
+        console.log("updateSalesTotal called");
+        var total = 0.00,totalDiscountVal=0.00;
         var tempprice = 0.00;
         curtaxtotal = 0.00; // clear last tax
         // validate records, marks valid records to be used in sale and informs user of invalid records
         // It also calculates item total and checks that its a correct result
-        validateSalesItems();
+        var temp1={};
+        var data1 = validateSalesItems(temp1);
         // cycle through valid records and add item total to the sales total
         var temptax;
+
         $("#itemtable").children('.valid').each(function (index, element) {
-                // get item total
+                //tempprice = parseFloat("0.00");
                 tempprice = parseFloat($(element).find(".itemprice").val());
+                var tempname = $(element).find(".itemname").val();
+                // get item total
                 // add to total
                 total += tempprice;
+                var discountVal = parseFloat($(element).find(".itemdiscountVal").val());
+                totalDiscountVal += discountVal;
                 // get tax amount included with each item
                 var taxtotals = $(element).find(".itemtaxval").data('taxdata');
                 curtaxtotal += taxtotals.total;
-        });
+               });
         // remove cur tax from the total and we have our subtotal
+
         curtotal = total;
+        curgrandtotal = total;
         cursubtotal = (total - curtaxtotal);
         $("#subtotal").text(WPOS.util.currencyFormat(cursubtotal.toFixed(2)));
         $("#totaltax").text(WPOS.util.currencyFormat(curtaxtotal.toFixed(2)));
-        this.updateDiscount();
+        $("#total").text(WPOS.util.currencyFormat(total.toFixed(2)));
+        var discountTxt = "" + WPOS.util.currencyFormat(totalDiscountVal);
+        $("#totalDiscountVal").val(totalDiscountVal);
+        var totalDiscountPercent = (totalDiscountVal / cursubtotal)*100;
+        $("#totalDiscountPercent").val(totalDiscountPercent);
+        $("#discounttxt").text(discountTxt);
+        //this.updateDiscount();
+    };
+    this.updateAllItemsDiscount = function () {
+        var newDiscount = $("#salediscount").val();
+        $("#itemtable").children('.valid').each(function (index, element) {
+            $(element).find(".itemdiscount").val(newDiscount);
+        });
+        this.updateSalesTotal();
     };
     this.updateStockTransferTotal = function () {
         var total = 0.00;
@@ -766,10 +791,13 @@ function WPOSSales() {
             this.updateSalesTotal();
             return;
         }
+        /* Commenting out for Individual Discount
         var discountobj = $("#salediscount");
         var distxtobj = $("#discounttxt");
         var discount = discountobj.val();
+        */
         curtotal = (parseFloat(cursubtotal) + parseFloat(curtaxtotal)); // !important reset total
+        /* Commenting out for individual discount system
         if (discount === "" || discount == "0" || discount === null) {
             discountobj.val("0");
             distxtobj.text("("+WPOS.util.currencyFormat("0.00")+")");
@@ -777,7 +805,8 @@ function WPOSSales() {
             var discountsum = ((discount / 100) * curtotal).toFixed(2);
             distxtobj.text("(" + WPOS.util.currencyFormat(discountsum) + ")");
             curtotal = (curtotal - discountsum);
-        }
+        }*/
+        $("#discounttxt").text();
         $("#total").text(WPOS.util.currencyFormat(curtotal.toFixed(2)));
     };
 
@@ -958,21 +987,29 @@ function WPOSSales() {
         }
     }
 
-    function validateSalesItems(){
-        var qty,name, unit, mod, tempprice, tempcost;
-        var numinvalid = 0;
+    function validateSalesItems(temp1){
+        var qty,name, unit, mod, tempprice, tempcost,discount;
+        var totalWithoutDiscount = 0.0,numinvalid = 0,totalDiscountVal = 0.0;
         var allow_negative = WPOS.getConfigTable().pos.negative_items;
         $("#itemtable").children(".item_row").each(function (index, element) {
                 qty = parseFloat($(element).find(".itemqty").val());
                 name = $(element).find(".itemname").val();
                 unit = parseFloat($(element).find(".itemunit").val());
+                discount = parseFloat($(element).find(".itemdiscount").val());
                 var itemdata = $(element).find(".itemid").data('options');
                 mod = itemdata.hasOwnProperty('mod') ? itemdata.mod.total : 0;
                 tempprice = parseFloat("0.00");
                 if (qty > 0 && name != "" && (unit>0 || allow_negative)) {
                     // add item modification total to unit price & calculate item total
+                    // Using Different Calculation , first calculate Discount and then add Tax
+                    //tempprice = qty * (unit + mod);
                     tempprice = qty * (unit + mod);
+                    totalWithoutDiscount += tempprice;
+                    var discountVal = (discount/100)*tempprice;
+                    $(element).find(".itemdiscountVal").val(discountVal);
+                    tempprice -= discountVal;
                     tempcost = qty * itemdata.cost;
+                    totalDiscountVal += discountVal;
                     // calculate item tax
                     var taxruleid = $(element).find(".itemtax").val();
                     var taxdata = WPOS.util.calcTax(taxruleid, tempprice, tempcost);
@@ -981,6 +1018,7 @@ function WPOSSales() {
                     }
                     $(element).find(".itemtaxval").data('taxdata', taxdata);
                     $(element).find(".itemprice").val(tempprice.toFixed(2));
+
                     // valid item; mark as valid, remove ui indicator class
                     $(element).addClass("valid");
                     $(element).removeClass("danger");
@@ -993,6 +1031,11 @@ function WPOSSales() {
                     // increment number invalid
                     numinvalid++;
                 }
+                var data={};
+                data.totalDiscount = totalDiscountVal;
+                data.totalWithoutDiscount = totalWithoutDiscount;
+                temp1=data;
+                return data;
         });
         // show warning if items invalid
         if (numinvalid>0){
@@ -1501,6 +1544,8 @@ function WPOSSales() {
                     "sitemid": $(element).find(".itemid").val(),
                     "qty": tempqty,
                     "name": $(element).find(".itemname").val(),
+                    "discount": parseFloat($(element).find(".itemdiscount ").val()).toFixed(2),
+                    "discountval": parseFloat($(element).find(".itemdiscountVal ").val()).toFixed(2),
                     "unit": parseFloat($(element).find(".itemunit").val()).toFixed(2),
                     "taxid": taxruleid,
                     "tax": taxdata,
@@ -1575,7 +1620,8 @@ function WPOSSales() {
         salesobj.custid = $("#custid").val();
         salesobj.custemail = $("#custemail").val();
         salesobj.notes = $("#salenotes").val();
-        salesobj.discount = $("#salediscount").val();
+        salesobj.discount = parseFloat($("#totalDiscountPercent").val()).toFixed(2);
+        salesobj.discountval = parseFloat($("#totalDiscountVal").val()).toFixed(2);
         salesobj.rounding = curround.toFixed(2);
         salesobj.cost = parseFloat(totalcost).toFixed(2);
         salesobj.subtotal = cursubtotal.toFixed(2);
