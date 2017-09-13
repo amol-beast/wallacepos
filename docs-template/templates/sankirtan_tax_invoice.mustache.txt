@@ -84,6 +84,10 @@
 
     <table>
         <tr>
+            <td>Transaction ID:</td>
+            <td>SN{{sale_id}}</td>
+        </tr>
+        <tr>
             <td>Transaction Ref:</td>
             <td>{{sale_ref}}</td>
         </tr>
@@ -113,15 +117,19 @@
             <td> Customer GSTIN:</td>
             <td>{{customer_gstin}}</td>
         </tr>
+        <tr>
+            <td> Payment Method:</td>
+            <td>{{#sale_payments}}{{label}}{{/sale_payments}}</td>
+        </tr>
     </table>
 
     <table>
-        <tr><td><b>qty</b></td><td><b>Item</b></td><td><b>HSN</b></td><td><b>GST</b></td><td style="text-align: right;"><b>Amount</b></td></tr>
+        <tr><td><b>qty</b></td><td><b>Item</b></td><td><b>HSN</b></td><td><b>GST</b></td><td><b>Disc</b></td><td style="text-align: right;"><b>Amount</b></td></tr>
         {{#sale_items}}
 
             <!--        <tr><td>{{qty}} x </td><td colspan="2">{{name}} ({{#currency}}{{unit}}{{/currency}})</td><td>{{#hsncode}}{{hsncode}}{{/hsncode}}</td><td style="text-align: right; vertical-align: top;">{{#currency}}{{price}}{{/currency}}</td></tr>-->
             <tr><td>{{qty}}</td><td>{{name}}({{#currency}}{{unit}}{{/currency}})</td><td>{{#hsncode}}{{hsncode}}{{/hsncode}}</td>
-                <td>{{#gsttax}}@{{gsttax}}%{{/gsttax}}</td>
+                <td>{{#gsttax}}@{{gsttax}}%{{/gsttax}}</td><td>{{#currency}}{{#discountval}}{{discountval}}{{/discountval}}{{/currency}}</td>
                 <td style="text-align: right;">{{#currency}}{{price}}{{/currency}}</td></tr>
             {{#print_desc}}
                 <tr><td></td><td>{{desc}}</td><td></td></tr>
@@ -130,11 +138,11 @@
                 <tr><td></td><td>{{#qty}}+ {{qty}} {{/qty}}{{name}}{{#value}} {{value}}: {{/value}} ({{#currency}}{{price}}{{/currency}})</td><td></td></tr>
             {{/mod.items}}
         {{/sale_items}}
-
+<!--
         {{#sale_discount}}
             <tr><td colspan="4"><b>{{sale_discount}}% Discount</b></td><td colspan="4" style="text-align: right;"><b>-{{sale_discountamt}}</b></td></tr>
         {{/sale_discount}}
-
+-->
         <tr style="height: 5px;"><td></td><td></td><td></td></tr>
         <tr><td colspan="4"><b>Total ({{sale_numitems}} items): </b></td><td colspan="2" style="text-align: right;"><b style="text-decoration: overline;">
             {{#currency}}{{sale_total}}{{/currency}}</b></td></tr>
@@ -151,10 +159,6 @@
         {{/show_subtotal}}
 -->
 
-            <tr><td colspan="2">Total CGST:</td><td style="text-align: right;">{{#currency}}{{cgst}}{{/currency}}</td></tr>
-            <tr><td colspan="2">Total SGST:</td><td style="text-align: right;">{{#currency}}{{sgst}}{{/currency}}</td></tr>
-
-        <tr><td colspan="2"><b>Total Taxes:</b></td><td style="text-align: right;"><b style="text-decoration: overline;">{{#currency}}{{taxsum}}{{/currency}}</b></td></tr>
 
 
 
@@ -162,7 +166,21 @@
             <tr><td colspan="2">{{label}}:</td><td style="text-align: right;">{{#currency}}{{amount}}{{/currency}}</td></tr>
         {{/sale_payments}}-->
     </table>
+    <div style="align:center">GST Breakup</div>
+<table style="border: 1px solid black;">
+        <tr><td><b>GST Desc</b></td><td><b>Sale value</b></td><td><b>Discount</b></td><td><b>Taxable</b></td><td><b>Total</b></td></tr><!--<td style="text-align: right;"><b>Amount</b></td></tr>        -->
+{{#gst_breakup}}
+<tr><td>{{gst}}</td><td>{{#currency}}{{sale_value}}{{/currency}}</td><td>{{#currency}}{{discount}}{{/currency}}</td><td>{{#currency}}{{taxable}}{{/currency}}</td><td>{{#currency}}{{total}}{{/currency}}</td></tr>
+{{/gst_breakup}}
+</table>
+<table>
+    <tr><td colspan="2">Total Discount:</td><td style="text-align: right;">{{#currency}}{{sale_discountval}}{{/currency}}</td></tr>
+<tr><td colspan="2">Total CGST:</td><td style="text-align: right;">{{#currency}}{{cgst}}{{/currency}}</td></tr>
+            <tr><td colspan="2">Total SGST:</td><td style="text-align: right;">{{#currency}}{{sgst}}{{/currency}}</td></tr>
 
+        <tr><td colspan="2"><b>Total Taxes:</b></td><td style="text-align: right;"><b style="text-decoration: overline;">{{#currency}}{{taxsum}}{{/currency}}</b></td></tr>
+
+</table>
     {{#sale_hasrefunds}}
         <p style="margin-top: 0; margin-bottom: 5px;">
             <strong>Refund</strong>
@@ -184,7 +202,7 @@
 
     {{#footer}}
         <h3 style="text-align: right;float:right">Authorised Signatory</h3>
-         <div style="margin-top:100px;text-align:center;margin-bottom:{{space}}px;float:center;float:bottom;font-size:25px;font-weight:bold"><h3>Chant Hare Krishna and Be Happy</h3>{{footer}}</div>
+         <div style="margin-top:100px;text-align:center;margin-bottom:{{space}}px;float:center;float:bottom;font-size:25px;font-weight:bold">{{footer}}</div>
 
     {{/footer}}
     <div style="margin-bottom:600px">**</div>
