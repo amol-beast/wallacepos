@@ -91,6 +91,10 @@
                         <td style="text-align: right;"><label>Unit Price:&nbsp;</label></td>
                         <td><input id="itemprice" type="text" value="0"/></td>
                     </tr>
+		             <tr>
+            		    <td style="text-align: right;"><label>Variable Price:&nbsp;</label></td>
+		                <td><input id="isEditVariableprice" type="checkbox" value="0"/></td>
+		            </tr>
                     <tr>
                         <td style="text-align: right;"><label>Tax:&nbsp;</label></td>
                         <td><select id="itemtax" class="taxselect">
@@ -188,6 +192,10 @@
         <tr>
             <td style="text-align: right;"><label>Unit Price:&nbsp;</label></td>
             <td><input id="newitemprice" type="text" value="0"/></td>
+        </tr>
+        <tr>
+            <td style="text-align: right;"><label>Variable Price:&nbsp;</label></td>
+            <td><input id="isVariableprice" type="checkbox" value="0"/></td>
         </tr>
         <tr>
             <td style="text-align: right;"><label>Tax:&nbsp;</label></td>
@@ -427,6 +435,10 @@
         $("#itemcode").val(item.code);
         $("#itemcost").val(item.cost);
         $("#itemprice").val(item.price);
+        if (item.isVariablePrice == true)
+            $('#isEditVariableprice')[0].checked = true;
+        else
+            $('#isEditVariableprice')[0].checked = false;
         $("#itemhsncode").val(item.hsncode);
         $("#itemsupplier").val(item.supplierid);
         $("#itemcategory").val(item.categoryid);
@@ -489,13 +501,14 @@
             costval = $("#newitemcost").val();
             item.cost = (costval ? costval : 0);
             item.price = $("#newitemprice").val();
-            item.supplierid = $("#newitemsupplier").val();
+	        item.isVariablePrice = $("#isVariableprice").is(':checked');
+	        item.supplierid = $("#newitemsupplier").val();
             item.categoryid = $("#newitemcategory").val();
             item.hsncode = $("#newitemhsncode").val();
             console.log(item.hsncode);
             item.type = "general";
             item.modifiers = [];
-            result = WPOS.sendJsonData("items/add", JSON.stringify(item));
+	        result = WPOS.sendJsonData("items/add", JSON.stringify(item));
             if (result!==false){
                 stock[result.id] = result;
                 reloadTable();
@@ -513,6 +526,7 @@
             costval = $("#itemcost").val();
             item.cost = (costval ? costval : 0);
             item.price = $("#itemprice").val();
+            item.isVariablePrice = $("#isVariableprice").is(':checked');
             item.supplierid = $("#itemsupplier").val();
             item.categoryid = $("#itemcategory").val();
             item.hsncode = $("#itemhsncode").val();

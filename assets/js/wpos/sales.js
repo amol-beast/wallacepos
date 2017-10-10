@@ -225,7 +225,8 @@ function WPOSItems() {
     function addItemRow(qty, name, unit, taxid, sitemid, data) {
         sitemid = (sitemid>0?sitemid:0);
         var disable = (sitemid>0); // disable fields that are filled by the stored item
-        var disableprice = (sitemid>0 && WPOS.getConfigTable().pos.priceedit!="always");
+        //var disableprice = (sitemid>0 && WPOS.getConfigTable().pos.priceedit!="always");
+        var disableprice = (sitemid>0 && !(data.isVariablePrice==true));
         var disabletax = (!WPOS.getConfigTable().pos.hasOwnProperty('taxedit') || WPOS.getConfigTable().pos.taxedit=='no');
         var row = $('<tr class="item_row">' +
             '<td><input class="itemid" type="hidden" value="' + sitemid + '" data-options=\''+JSON.stringify(data)+'\' /><input type="hidden" class="itemdiscountVal" value=""/> <input onChange="WPOS.sales.updateSalesTotal();" style="width:50px;" type="text" class="itemqty numpad" value="' + qty + '" /></td>' +
@@ -309,16 +310,18 @@ function WPOSItems() {
      */
     function addItem(item) {
         // Item cost may be null if we're adding stored items that were created in a previous version, explicitly set the cost in this case.
+        console.log("additem");
+        console.log(item);
         if (!item.hasOwnProperty('cost')) item.cost = 0.00;
         // TODO: remove last row from table if its invalid?
         // check if a priced item is already present in the sale and if so increment it's qty
         if (item.price==""){
             // insert item into table
-            addItemRow(1, item.name, item.price, item.taxid, item.id, {desc:item.description, hsncode:item.hsncode, cost:item.cost, unit_original:item.price, alt_name:item.alt_name});
+            addItemRow(1, item.name, item.price, item.taxid, item.id, {desc:item.description, hsncode:item.hsncode, cost:item.cost, unit_original:item.price, alt_name:item.alt_name, isVariablePrice:item.isVariablePrice});
         } else {
             if (!isItemAdded(item.id, true)){
                 // insert item into table
-                addItemRow(1, item.name, item.price, item.taxid, item.id, {desc:item.description, hsncode:item.hsncode, cost:item.cost, unit_original:item.price, alt_name:item.alt_name});
+                addItemRow(1, item.name, item.price, item.taxid, item.id, {desc:item.description, hsncode:item.hsncode, cost:item.cost, unit_original:item.price, alt_name:item.alt_name, isVariablePrice:item.isVariablePrice});
             }
         }
         $("#codeinput").val('');
