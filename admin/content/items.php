@@ -526,11 +526,10 @@
             costval = $("#itemcost").val();
             item.cost = (costval ? costval : 0);
             item.price = $("#itemprice").val();
-            item.isVariablePrice = $("#isVariableprice").is(':checked');
+            item.isVariablePrice = $("#isEditVariableprice").is(':checked');
             item.supplierid = $("#itemsupplier").val();
             item.categoryid = $("#itemcategory").val();
             item.hsncode = $("#itemhsncode").val();
-            console.log(item.hsncode);
             item.type = $("#itemtype").val();
             item.modifiers = [];
             $("#itemselmodtable .selmoditem").each(function(){
