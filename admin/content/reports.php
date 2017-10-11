@@ -3,6 +3,17 @@
     <h1 class="inline">
         Reports
     </h1>
+    <style type="text/css">
+        hr {
+            display: block;
+            height: 1px;
+            border: 0;
+            border-top: 1px solid #ccc;
+            margin: 1em 0;
+            padding: 0;
+        }
+
+    </style>
     <select id="reptype" onchange="generateReport();" style="vertical-align: middle; margin-right: 20px; margin-bottom: 5px;">
         <option value="stats/general">Summary</option>
         <option value="stats/takings">Takings Count</option>
@@ -29,6 +40,7 @@
         <label>Range: <input type="text" style="width: 85px;" id="repstime" onclick="$(this).blur();" /></label>
         <label>to <input type="text" style="width: 85px;" id="repetime" onclick="$(this).blur();" /></label>
     </div>
+    <!--
     <div style="display: inline-block; vertical-align:middle; margin-right: 20px;">
         <label>Location:
             <select id="repLocation" onchange="generateReport();" style="vertical-align: middle; margin-right: 20px; margin-bottom: 5px;">
@@ -37,7 +49,7 @@
             </select>
         </label>
 
-    </div>
+    </div>-->
     <div style="display: inline-block; vertical-align: top;">
         <button onclick="printCurrentReport();" class="btn btn-primary btn-sm"><i class="icon-print align-top bigger-125"></i>Print</button>&nbsp;
         <button class="btn btn-success btn-sm" onclick="exportCurrentReport();"><i class="icon-cloud-download align-top bigger-125"></i>Export CSV</button>
@@ -216,123 +228,31 @@
       var html = getReportHeader(repname);
         
         var rowdata;
-	    console.log(repdata);
-        var temp_data=[];
-        for(var i in repdata)
-        {
-            rowdata = repdata[i];
-	   
-            var locationid = parseInt(rowdata["locationid"]);
-            temp_data[locationid]= {};
-            console.log(temp_data[locationid]);
-            temp_data[locationid].items = 0;
-            temp_data[locationid].sale_subtotal = 0;
-            temp_data[locationid].tax = 0;
-            temp_data[locationid].refund_subtotal = 0;
-            temp_data[locationid].refund_tax = 0;
-            temp_data[locationid].total_tax = 0;
-            temp_data[locationid].name = 0;
-            temp_data[locationid].taxid = {};
-            temp_data[locationid]["card"] = {};
-            temp_data[locationid]["cash"] = {};
 
-        }
-        //console.log("temp_data in  next line");
-        //console.log(temp_data);
-        for(var i in repdata){
-		    rowdata = repdata[i];
-            var locationid = parseInt(rowdata["locationid"]);
-            var location = rowdata["name"];
-            temp_data[locationid].name = location;
-            console.log("rowdata next line");
-		    console.log(rowdata);
-		    var refArray = rowdata.refs.split(',');
-            var transactions= loadTransactions(refArray);
-            console.log("transactions next line");
-            console.log(transactions);
-            //console.log(refArray);
-            for(var j in transactions)
-            {
-                var items = transactions[j].items;
-		var payments = transactions[j].payments;
-		console.log("payments follows");
-		console.log(payments);
-		var paymentType = payments[0].method;
-		for (var k in items)
-                {
+        for(var location in repdata) {
 
-                    var itemtaxid = parseInt(items[k].taxid);
-                    if(typeof (temp_data[locationid][itemtaxid]) == 'undefined')
-                    {
-                        
-			temp_data[locationid][paymentType][itemtaxid] = {};
-                        temp_data[locationid][paymentType][itemtaxid].price = parseFloat(items[k].price);
-                        temp_data[locationid][paymentType][itemtaxid].items = parseInt(items[k].qty);
-                        var taxObject = items[k].tax;
-                        temp_data[locationid][paymentType][itemtaxid].total_tax= parseFloat(taxObject.total);
-                    }
-                    else
-                    {
-                        temp_data[locationid][paymentType][itemtaxid].price += parseFloat(items[k].price);
-                        temp_data[locationid][paymentType][itemtaxid].items += parseInt(items[k].qty);
-                        var taxObject = items[k].tax;
-			//console.log("taxobject follows");
-			//console.log(items[k]);
-                        temp_data[locationid][paymentType][itemtaxid].total_tax += parseFloat(taxObject.total);
-                    }
+            html += "</br></br><h3 style='text-align: center'><b>Location: "+location+"</b></h3>";
+            for (var paymentMethod in repdata[location]) {
+
+                html += "<h5 style='text-align: center'>Payment Method:"+paymentMethod+"</h5>";
+                html += "<table class='table table-stripped' style='width: 100%'><thead><tr><td>Name</td><td># Items</td><td>Taxable</td><td>Tax</td><td>Discount</td><td>Total</td></tr></thead><tbody>";
+                var total={name:"Total", qty: 0.0,taxable:0.0, tax:0.0, discount:0.0, total:0.0};
+
+                for( var taxName in repdata[location][paymentMethod]){
+
+                    var row = repdata[location][paymentMethod][taxName];
+
+                    html += '<tr><td>'+taxName+'</td><td>'+ row.qty+'</td><td>'+WPOS.util.currencyFormat(row.taxable)+'</td><td>'+WPOS.util.currencyFormat(row.tax)+'</td><td>'+WPOS.util.currencyFormat(row.discount)+'</td><td>'+WPOS.util.currencyFormat(row.total)+'</td></tr>';
+                    total.taxable += row.taxable;
+                    total.tax += row.tax;
+                    total.qty += row.qty;
+                    total.discount += row.discount;
+                    total.total += row.total;
                 }
-
+                html += '<tr><td><b>'+total.name+'</b></td><td><b>'+ total.qty+'</b></td><td><b>'+WPOS.util.currencyFormat(total.taxable)+'</b></td><td><b>'+WPOS.util.currencyFormat(total.tax)+'</b></td><td><b>'+WPOS.util.currencyFormat(total.discount)+'</b></td><td><b>'+WPOS.util.currencyFormat(total.total)+'</b></td></tr>';
+                html += "</tbody></table><div class='row'><div class='col-lg-8 col-lg-offset-2'><hr></div></div>";
             }
-
-
-
-	}
-        console.log("temp_data is:");
-        console.log(temp_data);
-        var taxrules = WPOS.getTaxTable().rules;
-        console.log("taxxrules:");
-        console.log(taxrules);
-
-	console.log("### Printing Temp_Data");
-        for ( var i in temp_data)
-        {   console.log("Location id:"+ i +" Location Name:"+ temp_data[i].name);
-            console.log(temp_data[i]);
-
-		html += "</br></br><h4 style='text-align: center'>Location: "+temp_data[i].name+"</h3>";
-		var paymentsType = ["cash","card"];
-		for ( var m in paymentsType)
-		{
-		var paymentType = paymentsType[m];
-		html += "<h5 style='text-align: center'>Payment Method:"+paymentType+"</h5>";	
-		html += "<table class='table table-stripped' style='width: 100%'><thead><tr><td>Name</td><td># Items</td><td>Sale Subtotal</td><td>Tax</td></tr></thead><tbody>";
-        	var totalLocationTaxSum = 0;    
-			for (var j in temp_data[i][paymentType])
-        		{
-		                if(typeof (temp_data[i][paymentType][j]) == 'undefined' ||  typeof(taxrules[j]) == 'undefined')
-                		{
-		                    continue;
-                		}
-		                else {
-                		    console.log("j:"+j);
-		                    console.log(temp_data[i][paymentType][j]);
-			            console.log("Tax id:"+j+ " Tax name:"+taxrules[j].name);
-                		      }
-				html += '<tr><td>'+taxrules[j].name+'</td><td>'+temp_data[i][paymentType][j].items+'</td><td>'+WPOS.util.currencyFormat(temp_data[i][paymentType][j].price)+'</td><td>'+WPOS.util.currencyFormat(temp_data[i][paymentType][j].total_tax)+'</td></tr>';
-				totalLocationTaxSum += temp_data[i][paymentType][j].total_tax ;
-            		}
-		html += "<h5 style='text-align: center'>Total Tax:"+totalLocationTaxSum + "</h5>";	
-		html += "</tbody></table></hr>";
-
-        	}
-	}
-/*
-        for (var i in repdata){
-            rowdata = repdata[i];
-	    html += '<tr><td><a onclick="WPOS.transactions.openTransactionList(\''+rowdata.refs+'\');">'+rowdata.name+'</a></td><td>'+rowdata.qtyitems+'</td><td>'+WPOS.util.currencyFormat(rowdata.saletotal)+'</td><td>'+WPOS.util.currencyFormat(rowdata.saletax)+'</td><td>'+WPOS.util.currencyFormat(rowdata.refundtotal)+'</td></tr>';
-
         }
-*/
-        
 
         $("#reportcontain").html(html);
     }
@@ -367,7 +287,6 @@
         printw.document.write(html);
         printw.document.write('</body></html>');
         printw.document.close();
-
         printw.print();
         printw.close();
     }

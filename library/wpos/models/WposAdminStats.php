@@ -323,90 +323,107 @@ class WposAdminStats {
      * @param $result
      * @return mixed
      */
-    public function getTaxLocationStats($result){
+    public function getTaxLocationWiseBreakdownStats($result,$stime,$etime){
         $stats = [];
-        $itemsMdl = new SaleItemsModel();
+        $itemsMdl = new SalesModel();
+        $locationsMdl = new LocationsModel();
         // check if params set, if not set defaults
         $stime = isset($this->data->stime)?$this->data->stime:(strtotime('-1 week')*1000);
         $etime = isset($this->data->etime)?$this->data->etime:(time()*1000);
 
-        if (is_array($saleitems = $itemsMdl->getTotalsRange($stime, $etime, true, $this->data->type))){
+        if (is_array($sales= $itemsMdl->getRange($stime,$etime,null,null,false,false))){
             $taxMdl = new TaxItemsModel();
             $taxdata = $taxMdl->get();
-            $taxes = [];
+
+            ini_set('xdebug.var_display_max_depth', '20');
+            $taxMap = [];
+
             foreach ($taxdata as $value){
-                $taxes[$value['id']] = (object) $value;
+                $taxMap[$value['id']] = $value["name"];
             }
 
-            foreach ($saleitems as $saleitem){
-                $itemtax = json_decode($saleitem['tax']);
+            $totalSalesLocationWise=[];
 
-                if ($itemtax->total==0){
-                    if (!array_key_exists(-1, $stats)){
-                        $stats[-1] = new stdClass();
-                        $stats[-1]->refs = [];
-                        $stats[-1]->name = "Untaxed";
-                        $stats[-1]->qtyitems = 0;
-                        $stats[-1]->saletotal = 0;
-                        $stats[-1]->refundtotal = 0;
-                        $stats[-1]->saletax = 0;
-                        $stats[-1]->refundtax = 0;
-                    }
-                    if (!in_array($saleitem['ref'], $stats[-1]->refs))
-                        $stats[-1]->refs[] = $saleitem['ref'];
-                    $stats[-1]->qtyitems += $saleitem['qty'];
-                    $stats[-1]->saletotal += $saleitem['itemtotal'];
-                    $stats[-1]->refundtotal += $saleitem['refundtotal'];
-                } else {
-                    // subtotal excludes tax, factors in discount
-                    $discountedtax = $saleitem['discount']>0 ?  round($itemtax->total - ($itemtax->total*($saleitem['discount']/100)), 2) : $itemtax->total;
-                    //echo($discountedtax);
-                    $itemsubtotal = $saleitem['itemtotal'] - $discountedtax;
-                    $refundsubtotal = $saleitem['refundtotal'] - round(($discountedtax/$saleitem['qty']) * $saleitem['refundqty'], 2);
-                    foreach ($itemtax->values as $key=>$value){
-                        if (!array_key_exists($key, $stats)){
-                            $stats[$key] = new stdClass();
-                            $stats[$key]->refs = [];
-                            $stats[$key]->name = isset($taxes[$key])?$taxes[$key]->name:"Unknown";
-                            $stats[$key]->qtyitems = 0;
-                            $stats[$key]->saletotal = 0;
-                            $stats[$key]->refundtotal = 0;
-                            //$stats[$key]->saletax = 0;
-                            //$stats[$key]->refundtax = 0;
+            $locations = $locationsMdl->get();
+            $locationMap=[];
+            foreach ($locations as $location){
+                $locationMap[$location["id"]] = $location["name"];
+            }
+
+            foreach ($sales as $sale){
+
+                $data = json_decode($sale["data"]);
+                //var_dump($data);
+                $refundMap = [];
+                if($sale["status"] == "1" or $sale["status"]=="2")  // Only Process Complete & Refunded Sales
+                {
+                    if ($sale["status"]=="2") {  //It's a refund . store all refund items
+                        $refundData = $data->refunddata;
+                        $refundItems = $refundData[0]->items;
+
+                        foreach ($refundItems as $refundItem){
+                            $refundMap[$refundItem->ref] = (int)$refundItem->numreturned;
                         }
-                        if (!in_array($saleitem['ref'], $stats[$key]->refs))
-                            $stats[$key]->refs[] = $saleitem['ref'];
-                        $stats[$key]->qtyitems += $saleitem['qty'];
-                        $stats[$key]->saletotal += $itemsubtotal; // subtotal excludes tax, factors in discount
-                        $stats[$key]->refundtotal += $refundsubtotal;
-                        //$stats[$key]->saletax += $saleitem['discount']>0 ? round($value - ($value*($saleitem['discount']/100)), 2) : $value;
-                        // $stats[$key]->refundtax += $saleitem['discount']>0 ? (round($value/($saleitem['discount']/100), 2)/$saleitem['qty'])*$saleitem['refundqty']: ($value/$saleitem['qty'])*$saleitem['refundqty'];
                     }
+
+                    $locationId = $sale["locationid"];
+                    $locationName = $locationMap[$locationId];
+
+                    $taxData = $data->taxdata;
+                    $paymentMethod = $data->payments[0]->method; // Assuming only one payment method. Need to handle for multiple payment method in singe bill.
+
+                        foreach ($data->items as $item)
+                        {
+                            $discount = 0;
+                            $price = $item->price;
+                            if(isset($item->discount)){  // Check if item wise discount or overall Discount
+                                $discount = $item->discount;
+                            }
+                            else {
+                                $discount = $sale["discount"];
+                            }
+                            $taxValues = $item->tax->values;
+                            foreach ($taxValues as $key => $val) {
+                                $taxKey = $taxMap[$key];
+                            }
+
+                            $actualQty = $item->qty;
+                            if(array_key_exists($item->ref,$refundMap)){
+                                $actualQty = floatval($item->qty) - floatval ($refundMap[$item->ref]) ;
+                            }
+                            $itemSubTotal = $actualQty * floatval($item->unit_original);
+                            $discountedItemSubTotal = $itemSubTotal - ($itemSubTotal * ($discount /100));
+                            $tax =  ($item->tax->total / $item->qty) * $actualQty;
+                            //var_dump($sale);
+
+                            if (isset ($totalSalesLocationWise[$locationName][$paymentMethod][$taxKey])) {
+                                $totalSalesLocationWise[$locationName][$paymentMethod][$taxKey]-> taxable += $discountedItemSubTotal;
+                                $totalSalesLocationWise[$locationName][$paymentMethod][$taxKey]-> discount += ($itemSubTotal - $discountedItemSubTotal);
+                                $totalSalesLocationWise[$locationName][$paymentMethod][$taxKey]-> total += ($discountedItemSubTotal + $tax);
+                                $totalSalesLocationWise[$locationName][$paymentMethod][$taxKey]-> tax += $tax;
+                                $totalSalesLocationWise[$locationName][$paymentMethod][$taxKey]-> qty += $actualQty;
+                            }
+                            else {
+                                $totalSalesLocationWise[$locationName][$paymentMethod][$taxKey]-> taxable = $discountedItemSubTotal;
+                                $totalSalesLocationWise[$locationName][$paymentMethod][$taxKey]-> discount = ($itemSubTotal - $discountedItemSubTotal);
+                                $totalSalesLocationWise[$locationName][$paymentMethod][$taxKey]-> total = ($discountedItemSubTotal + $tax);
+                                $totalSalesLocationWise[$locationName][$paymentMethod][$taxKey]-> tax = $tax;
+                                $totalSalesLocationWise[$locationName][$paymentMethod][$taxKey]-> qty = $actualQty;
+                            }
+                        }
+
                 }
+
             }
-            foreach ($stats as $key=>$value){
-                $taxitems = WposAdminUtilities::getTaxTable()['items'];
-                $stats[$key]->saletax = round($taxitems[$key]['multiplier']*$stats[$key]->saletotal, 2);
-                $stats[$key]->refundtax = round($taxitems[$key]['multiplier']*$stats[$key]->refundtotal, 2);
-                $stats[$key]->balance = number_format($stats[$key]->saletax-$stats[$key]->refundtax, 2);
-            }
-            // Get cash rounding total
-            $roundtotals = $itemsMdl->getRoundingTotal($stime, $etime);
-            if ($roundtotals!==false){
-                $stats[0] = new stdClass();
-                $stats[0]->refs = $roundtotals[0]['refs'];
-                $stats[0]->name = "Cash Rounding";
-                $stats[0]->qty = $roundtotals[0]['num'];
-                $stats[0]->total = $roundtotals[0]['total'];
-            } else {
-                $result['error'] = $itemsMdl->errorInfo;
-            }
-        } else {
-            $result['error'] = $itemsMdl->errorInfo;
         }
 
-        $result['data'] = $stats;
-
+        /*  to be kept now For Debugging
+        var_dump($totalSalesLocationWise);
+        $result1 = ob_get_clean();
+        $fh = fopen("testwed.html", 'w');
+        fwrite($fh, $result1 );
+        fclose($fh); */
+        $result['data'] = $totalSalesLocationWise;
         return $result;
     }
 

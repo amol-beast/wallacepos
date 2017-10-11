@@ -592,7 +592,7 @@ function routeApiCall($action, $data, $result) {
             break;
 	case "stats/taxLocationsWise": // whats selling, grouped by stored items
             $statsMdl = new WposAdminStats($data);
-            $result = $statsMdl->getDeviceBreakdownStats($result, 'location');
+            $result = $statsMdl->getTaxLocationWiseBreakdownStats($result);
             break;
         // GRAPH
         case "graph/general": // like the general stats, but in graph form/time.
