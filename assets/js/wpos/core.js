@@ -1780,6 +1780,7 @@ function initStockTransfer(){
     $("#stockTransferitems").css("margin-bottom", (80+height)+"px");
     var locations = WPOS.sendJsonData("locations/get", "");
     var html ="";
+    $("#transferLocation").html('');
 	for (var i in locations)
     {
         html += '<option value="' + locations[i].id + '">'+ locations[i].name+'</option>'
