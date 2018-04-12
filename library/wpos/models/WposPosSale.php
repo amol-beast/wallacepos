@@ -1,3 +1,4 @@
+
 <?php
 /**
  * WposSale is part of Wallace Point of Sale system (WPOS) API

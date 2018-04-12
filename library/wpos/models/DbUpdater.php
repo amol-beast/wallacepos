@@ -107,7 +107,8 @@ class DbUpdater {
         '1.4.0'=>['name'=>'1.4.0', 'db'=>true, 'script'=>true],
         '1.4.1'=>['name'=>'1.4.1', 'db'=>true, 'script'=>true],
         '1.4.2'=>['name'=>'1.4.2', 'db'=>false, 'script'=>true],
-        '1.4.3'=>['name'=>'1.4.3', 'db'=>true, 'script'=>true]
+        '1.4.3'=>['name'=>'1.4.3', 'db'=>true, 'script'=>true],
+        '1.4.4'=>['name'=>'1.4.4', 'db'=>true, 'script'=>false],
     ];
 
     public static function getLatestVersionName(){

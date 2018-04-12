@@ -193,11 +193,17 @@ function routeApiCall($action, $data, $result) {
         case "sales/add":
             $sale = new WposPosSale($data);
             $result = $sale->insertTransaction($result);
+
+            $wposbusyInterface = new WposBusyInterface();
+            $wposbusyInterface->informBusyBridge();
             break;
 
         case "sales/void": // also used for sale refunds
             $sale = new WposPosSale($data, false);
             $result = $sale->insertVoid($result);
+
+            $wposbusyInterface = new WposBusyInterface();
+            $wposbusyInterface->informBusyBridge();
             break;
 
         case "sales/search":
@@ -210,6 +216,9 @@ function routeApiCall($action, $data, $result) {
         case "sales/updatenotes":
             $sale = new WposPosSale($data, false);
             $result = $sale->updateTransationNotes($result);
+
+            $wposbusyInterface = new WposBusyInterface();
+            $wposbusyInterface->informBusyBridge();
             break;
 
         case "transactions/get":
@@ -468,14 +477,23 @@ function routeApiCall($action, $data, $result) {
         case "sales/delete":
             $aSaleMdl = new WposTransactions($data);
             $result = $aSaleMdl->deleteSale($result);
+
+            $wposbusyInterface = new WposBusyInterface();
+            $wposbusyInterface->informBusyBridge();
             break;
         case "sales/deletevoid":
             $aSaleMdl = new WposTransactions($data);
             $result = $aSaleMdl->removeVoidRecord($result);
+
+            $wposbusyInterface = new WposBusyInterface();
+            $wposbusyInterface->informBusyBridge();
             break;
         case "sales/adminvoid": // the admin add void method, only requires sale id and reason
             $aSaleMdl = new WposTransactions($data);
             $result = $aSaleMdl->voidSale($result);
+
+            $wposbusyInterface = new WposBusyInterface();
+            $wposbusyInterface->informBusyBridge();
             break;
 
         // INVOICES

@@ -6,4 +6,10 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'AsyncRequest\\AsyncRequest' => $vendorDir . '/async-request/async-request/src/AsyncRequest/AsyncRequest.php',
+    'AsyncRequest\\Exception' => $vendorDir . '/async-request/async-request/src/AsyncRequest/Exception.php',
+    'AsyncRequest\\IRequest' => $vendorDir . '/async-request/async-request/src/AsyncRequest/IRequest.php',
+    'AsyncRequest\\Request' => $vendorDir . '/async-request/async-request/src/AsyncRequest/Request.php',
+    'AsyncRequest\\RequestCallback' => $vendorDir . '/async-request/async-request/src/AsyncRequest/RequestCallback.php',
+    'AsyncRequest\\Response' => $vendorDir . '/async-request/async-request/src/AsyncRequest/Response.php',
 );

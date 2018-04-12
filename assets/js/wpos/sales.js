@@ -317,11 +317,11 @@ function WPOSItems() {
         // check if a priced item is already present in the sale and if so increment it's qty
         if (item.price==""){
             // insert item into table
-            addItemRow(1, item.name, item.price, item.taxid, item.id, {desc:item.description, hsncode:item.hsncode, cost:item.cost, unit_original:item.price, alt_name:item.alt_name, isVariablePrice:item.isVariablePrice});
+            addItemRow(1, item.name, item.price, item.taxid, item.id, {code:item.code ,desc:item.description, hsncode:item.hsncode, cost:item.cost, unit_original:item.price, alt_name:item.alt_name, isVariablePrice:item.isVariablePrice});
         } else {
             if (!isItemAdded(item.id, true)){
                 // insert item into table
-                addItemRow(1, item.name, item.price, item.taxid, item.id, {desc:item.description, hsncode:item.hsncode, cost:item.cost, unit_original:item.price, alt_name:item.alt_name, isVariablePrice:item.isVariablePrice});
+                addItemRow(1, item.name, item.price, item.taxid, item.id, {code:item.code ,desc:item.description, hsncode:item.hsncode, cost:item.cost, unit_original:item.price, alt_name:item.alt_name, isVariablePrice:item.isVariablePrice});
             }
         }
         $("#codeinput").val('');
@@ -699,7 +699,7 @@ $(function () {
 });
 
 function WPOSSales() {
-    var paymentMethods = ['eftpos', 'credit', 'cash', 'cheque', 'deposit','card'];
+    var paymentMethods = ['credit', 'cash', 'cheque', 'deposit','card'];
     var cursubtotal = 0.00;
     var curtaxtotal = 0.00;
     var curtotal = 0.00;
@@ -1235,7 +1235,7 @@ function WPOSSales() {
 
         var payrow =  '<tr '+data+'><td>' +
             '<select class="paymethod" onchange="WPOS.sales.onPaymentMethodChange(this);">' +
-            '<option value="eftpos" '+(method=='eftpos'?'selected':'')+'>Eftpos</option>' +
+            //'<option value="eftpos" '+(method=='eftpos'?'selected':'')+'>Eftpos</option>' +
             '<option value="credit" '+(method=='credit'?'selected':'')+'>Credit</option>' +
             '<option value="cash" '+(method=='cash'?'selected':'')+'>Cash</option>' +
             '<option value="cheque" '+(method=='cheque'?'selected':'')+'>Cheque</option>' +
