@@ -236,7 +236,7 @@ function WPOSItems() {
             '<td><button onclick="WPOS.items.openItemModDialog(this);" class="btn btn-primary btn-xs"><i class="icon-list-ul"></i></button><div class="itemmodtext"></div></td>' +
             '<td><input style="max-width:50px;" type="text" class="itemdiscount numpad" value="0.00" onChange="WPOS.sales.updateSalesTotal();" /></td>' +
             '<td><select '+((disabletax==true && taxid!=null)?"disabled":"")+' onChange="WPOS.sales.updateSalesTotal();" style="max-width:110px;" class="itemtax">' +getTaxSelectHTML(taxid)+ '</select><input class="itemtaxval" type="hidden" value="0.00" /></td>' +
-            '<td><input style="max-width:50px;" type="text" class="itemprice" value="0.00" disabled /></td>' +
+            '<td><input style="max-width:100px;" type="text" class="itemprice" value="0.00" disabled /></td>' +
             '<td style="text-align: center;"><button class="btn btn-sm btn-danger" onclick="WPOS.items.removeItem($(this));">X</button></td>' +
             '<input type="hidden" class="itemdiscountVal" value=""/>' +
             '</tr>');
