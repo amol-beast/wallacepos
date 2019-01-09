@@ -398,6 +398,7 @@
         data['gcontact'] = $("#gcontact").is(":checked")?1:0;
         data['email_tls'] = $("#email_tls").is(":checked");
         var result = WPOS.sendJsonData("settings/general/set", JSON.stringify(data));
+        console.log(data);
         if (result !== false){
             WPOS.setConfigSet('general', result);
         }

@@ -1261,6 +1261,7 @@ function WPOSSales() {
     };
 
     function processOrder(){
+        console.log("process Order called");
         var salesobj = getSaleObject();
         var sales_json = JSON.stringify(salesobj);
         if (sales_json.length > 16384) return alert('Too Many Items'); // depends on database field size for sales.data
@@ -1272,6 +1273,7 @@ function WPOSSales() {
             }
             removeSalesRecord(curref);
         }
+
         lasttransref = salesobj.ref;
         salesobj.isorder = true;
         // add to offline table temporarily
@@ -1388,6 +1390,7 @@ function WPOSSales() {
 
     // FUNCTIONS BELOW ARE FOR PROCESSING THE SALE
     this.processSale = function () {
+        console.log("process Sale");
         var salebtn = $("#endsalebtn");
         salebtn.prop("disabled", true);
         if (!isSaleBalanced()){
@@ -1423,6 +1426,7 @@ function WPOSSales() {
     }
 
     function ProcessSaleTransaction(){
+        console.log("Process Sale Transaction");
         var salesobj = getSaleObject();
         var sales_json = JSON.stringify(salesobj);
         if (sales_json.length > 16384) return alert('Too Many Items'); // depends on database field size for sales.data
@@ -1436,6 +1440,23 @@ function WPOSSales() {
             delete salesobj.isorder;
             removeSalesRecord(curref);
         }
+        //Get Last BUSY sales id
+        if (localStorage.getItem("wpos_config") !== null) {
+            jsonConfig = $.parseJSON(localStorage.getItem("wpos_config"));
+            locationName = jsonConfig.locationname;
+        }
+/*
+        $.post( "busy/getLastSalesId", {location: locationName },function( data ) {
+            console.log("success");
+            console.log(data);
+            salesobj.busy_voucher_id = data;
+        }).fail(function(jqXHR, textStatus, error){
+            console.log(error);
+            alert("Error connecting to Server:" +error);
+            return;
+        });
+
+*/
         // add to offline table temporarily
         addOfflineSale(salesobj, "sales/add");
         lasttransref = salesobj.ref; // set for recall function use

@@ -183,6 +183,7 @@ class WposAdminSettings {
         }
         $this->configMdl = new ConfigModel();
         $config = $this->configMdl->get($this->name);
+
         if ($config!==false){
             if (sizeof($config)>0){
 
@@ -199,6 +200,8 @@ class WposAdminSettings {
                     }
                     unset($this->data->gcontactcode);
                 }
+                //echo phpinfo();die();
+                //var_export($this->data);die();
 
                 // generate new qr code
                 if ($this->name == "pos"){
@@ -225,6 +228,7 @@ class WposAdminSettings {
                         $fileconfig = $this->updateConfigFileValues($this->data);
                         // only set specific file values for broadcast, email config only needed server side
                         $conf->timezone = $fileconfig->timezone;
+
                         $conf->feedserver_port = $fileconfig->feedserver_port;
                         $conf->feedserver_proxy = $fileconfig->feedserver_proxy;
 

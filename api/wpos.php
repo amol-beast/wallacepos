@@ -190,6 +190,11 @@ function routeApiCall($action, $data, $result) {
             $result = $sale->removeOrder($result);
             break;
 
+        case "busy/getLastSalesId":
+            $wposbusyInterface = new WposBusyInterface();
+            $result = $wposbusyInterface->getLastSalesId($data);
+            break;
+
         case "sales/add":
             $sale = new WposPosSale($data);
             $result = $sale->insertTransaction($result);

@@ -8,9 +8,24 @@
  */
 class WposBusyInterface
 {
+    protected $busy_bridge_url;
+
+    protected function init()
+    {
+        $config_model = new ConfigModel();
+        $config = $config_model->get("busy_integration_config")[0];
+        //$output = print_r($config, true);
+        //file_put_contents('file.txt', $output);
+        $this->busy_bridge_url = json_decode($config["data"])->busy_bridge_url;
+        //$this->busy_bridge_url = "http://localhost:9085/";
+
+
+
+    }
     public function informBusyBridge()
     {
-        $url = "b.com/hook/activity";
+        $this->init();
+        $url = $this->busy_bridge_url."/hook/activity/sales";
         $error = new \stdClass();
         $urls = [
             $url,
@@ -24,29 +39,25 @@ class WposBusyInterface
                 //echo $response->getBody() . "\n";
             });
         }
-
         $asyncRequest->run();
-        /*
-        $timeout = 10;
-        $ch = curl_init();
-        curl_setopt ( $ch, CURLOPT_URL, $url );
-        curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, 1 );
-        curl_setopt ( $ch, CURLOPT_TIMEOUT, $timeout );
-        $http_respond = curl_exec($ch);
-        $http_respond = trim( strip_tags( $http_respond ) );
-        $http_code = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
-        $error = new \stdClass();
-        //dd(get_defined_vars());
-        if ( ( $http_code == "200" ) || ( $http_code == "302" ) ) {
-            $error->code=0;
-        } else {
-            // return $http_code;, possible too
-            $error->code=1;
-        }
-        $error->http_code=$http_code;
-        curl_close( $ch );*/
+    }
+    public function getLastSalesId($data)
+    {
+        $this->init();
+        $url = $this->busy_bridge_url."/getCurrentBusySaleVoucherID";
 
-        //return json_encode($error);
+        $ch = curl_init();
+        $val = "location=".$data;
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS,
+            $val);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        $server_output = curl_exec($ch);
+        return $server_output;
+        $vchNo = json_decode($server_output);
+
     }
 
 

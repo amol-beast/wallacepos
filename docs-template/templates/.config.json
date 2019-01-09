@@ -1,5 +1,5 @@
 {
-  "timezone":"Australia/Sydney",
+  "timezone":"Asia/Kolkata",
   "email_host":"127.0.0.1",
   "email_port":"25",
   "email_tls":true,
