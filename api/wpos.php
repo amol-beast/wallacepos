@@ -25,6 +25,12 @@
 $_SERVER['APP_ROOT'] = "/";
 
 require($_SERVER['DOCUMENT_ROOT'] . $_SERVER['APP_ROOT'] . 'library/wpos/config.php');
+require($_SERVER['DOCUMENT_ROOT'] . $_SERVER['APP_ROOT'] . 'library/async-request/async-request/src/AsyncRequest/AsyncRequest.php');
+require($_SERVER['DOCUMENT_ROOT'] . $_SERVER['APP_ROOT'] . 'library/async-request/async-request/src/AsyncRequest/Exception.php');
+require($_SERVER['DOCUMENT_ROOT'] . $_SERVER['APP_ROOT'] . 'library/async-request/async-request/src/AsyncRequest/IRequest.php');
+require($_SERVER['DOCUMENT_ROOT'] . $_SERVER['APP_ROOT'] . 'library/async-request/async-request/src/AsyncRequest/Request.php');
+require($_SERVER['DOCUMENT_ROOT'] . $_SERVER['APP_ROOT'] . 'library/async-request/async-request/src/AsyncRequest/RequestCallback.php');
+require($_SERVER['DOCUMENT_ROOT'] . $_SERVER['APP_ROOT'] . 'library/async-request/async-request/src/AsyncRequest/Response.php');
 // setup api error handling
 set_error_handler("errorHandler", E_ERROR | E_PARSE);
 set_error_handler("warningHandler", E_WARNING);

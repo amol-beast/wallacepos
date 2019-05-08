@@ -174,6 +174,7 @@
                                     <option value="0">None</option>
                                     <option value="5">5¢</option>
                                     <option value="10">10¢</option>
+                                    <option value="100">100¢</option>
                                 </select>
                             </div>
                         </div>

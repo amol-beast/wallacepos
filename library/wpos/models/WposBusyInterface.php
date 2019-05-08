@@ -19,8 +19,6 @@ class WposBusyInterface
         $this->busy_bridge_url = json_decode($config["data"])->busy_bridge_url;
         //$this->busy_bridge_url = "http://localhost:9085/";
 
-
-
     }
     public function informBusyBridge()
     {

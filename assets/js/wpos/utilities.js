@@ -255,7 +255,11 @@ function WPOSUtil() {
     function getIncludedTax(multiplier, taxablemulti, value){
         value = parseFloat(value);
         var taxable = (value-(value/(parseFloat(taxablemulti)+1)));
-        return Number( ((taxable/taxablemulti)*multiplier).toFixed(2) );
+        var p = Number( ((taxable/taxablemulti)*multiplier).toFixed(2) );
+        if(isNaN(p))
+            return 0;
+        else
+            return p;
     }
     function getExcludedTax(multiplier, value){
         return Number( (parseFloat(multiplier)*parseFloat(value)).toFixed(2) );
