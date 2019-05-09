@@ -831,8 +831,8 @@ function WPOSSales() {
         paymentstable.children('tr').each(function (index, element) {
             var paystr = $(element).find(".payamount").val();
             temppay = parseFloat(paystr);
-            if ($(element).find(".paymethod").val()=='cash'){
-                // apply cash rounding
+            if ($(element).find(".paymethod").val()=='cash' || $(element).find(".paymethod").val()=='card' || $(element).find(".paymethod").val()=='upi'){
+                // apply cash,card,upi rounding
                 temppay = roundcents>0?WPOS.util.roundToNearestCents(roundcents, temppay):temppay;
                 // get tender amount
                 var change, tendfield = $(element).find(".paytender");

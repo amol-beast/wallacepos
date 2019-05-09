@@ -50,9 +50,9 @@ function WPOS() {
             return false;
         }
         // Check application cache: not required to run
-        if (window.applicationCache == null){
+        /*if (window.applicationCache == null){
             alert("Your browser does not support applicationCache and will not be able to function offline.");
-        }
+        }*/
         return true;
     }
 
