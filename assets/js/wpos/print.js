@@ -511,6 +511,8 @@ function WPOSPrint(kitchenMode) {
     };
 
     this.testReceiptPrinter = function(printer) {
+        this.testBitmapReceipt(printer);
+        return;
         var method = getPrintSetting(printer, 'method');
         if (method == "ht" || method == "wp") {
             testReceipt(printer);
@@ -814,6 +816,7 @@ function WPOSPrint(kitchenMode) {
 
     function getESCPImageString(url, callback) {
         img = new Image();
+        img.crossOrigin = "Anonymous";
         img.onload = function () {
             // Create an empty canvas element
             var canvas = document.createElement('canvas');
@@ -830,8 +833,8 @@ function WPOSPrint(kitchenMode) {
         img.src = url;
     }
 
-    this.testBitmapReceipt = function(ref){
-        var record = WPOS.trans.getTransactionRecord(ref!=null?ref:"1449222132735-1-5125");
+    this.testBitmapReceipt = function(printer,ref=null){
+        var record = WPOS.trans.getTransactionRecord(ref!=null?ref:"1558059821004-1-2227");
         var html = getHtmlReceipt(record, true);
         getESCPHtmlString(html, function(data){
             sendESCPPrintData('receipts', data + getFeedAndCutCommands(printer));
@@ -869,6 +872,7 @@ function WPOSPrint(kitchenMode) {
                     '</svg>';
 
         var img = new Image();
+        img.crossOrigin = "Anonymous";
         var url;
         if (is_chrome){
             url = "data:image/svg+xml;utf8," + data;
@@ -891,6 +895,7 @@ function WPOSPrint(kitchenMode) {
             var bytedata = esc_init + getESCPImageSlices(ctx, canvas) + font_reset;
             callback(bytedata);
         };
+        img.setAttribute('crossOrigin', 'anonymous');
         img.src = url;
     }
 

@@ -1,3 +1,4 @@
+Header Set Access-Control-Allow-Origin "*"
 AddType application/x-httpd-php .appcache
 <IfModule mod_expires.c>
   <Files *.appcache>
