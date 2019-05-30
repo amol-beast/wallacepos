@@ -128,7 +128,7 @@ function WPOS() {
             WPOS.eftpos.initiate();
     };
     this.initKeypad = function(){
-        setKeypad(false);
+        //setKeypad(false);
     };
     function setKeypad(setcheckbox){
         if (getLocalConfig().keypad == true ){
@@ -1695,6 +1695,7 @@ $(function () {
         var x;
         var keypad = $(".keypad-popup");
         var paymentsopen = $("#paymentsdiv").is(":visible");
+        var keyPadOpen =  (document.activeElement.className == "itemqty numpad")? true: false;
         switch (event.which){
             /*case 37: // left arrow
                 keypad.hide();
@@ -1717,7 +1718,7 @@ $(function () {
                 WPOS.sales.userAbortSale();
                 break;
             case 36: // home
-
+                $("#itemsearch").trigger('click').focus();
                 break;
             case 35: // end
                 if (paymentsopen) {
@@ -1733,13 +1734,37 @@ $(function () {
                     WPOS.sales.addPayment('cash');
                     break;
                 case 88:
-                    WPOS.sales.addPayment('credit');
+                    WPOS.sales.addPayment('upi');
                     break;
                 case 67:
                     WPOS.sales.addPayment('card');
                     break;
                 case 86:
                     WPOS.sales.addPayment('cheque');
+                    break;
+                case 19:
+                    WPOS.sales.saveOrder();
+                    break;
+            }
+        }
+        if (keyPadOpen)
+        {
+            console.log("keypad is opened");
+            var val = Number($("#"+document.activeElement.id).val());
+            switch (event.which){
+                case 38: // Up arrow increase qty +1
+                    $("#" + document.activeElement.id).val(val+1);
+                    $("#" + document.activeElement.id).focus();
+                    break;
+                case 40: // Down arrow decrease qty -1
+                    if(val>0)
+                        $("#" + document.activeElement.id).val(val-1);
+                        $("#" + document.activeElement.id).focus();
+                    break;
+                case 13: // Enter
+                    console.log("keypad open enter presed");
+                    //$(".keypad-close").trigger("click");
+                    WPOS.sales.updateSalesTotal();
                     break;
             }
         }

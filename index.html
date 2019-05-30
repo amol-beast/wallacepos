@@ -103,8 +103,8 @@
                 <table style="width: 100%; margin-bottom: 0;" class="table table-striped table-bordered">
                     <thead class="table-header">
                     <tr style="text-align: left">
-                        <th>Qty</th>
                         <th>Name</th>
+                        <th>Qty</th>
                         <th>Unit</th>
                         <th>Options</th>
                         <th>Discount</th>
@@ -1038,10 +1038,12 @@
         </div>
         <div style="margin-top: 20px;">
             <button class="btn btn-xs btn-primary" onclick="WPOS.sales.addPayment('cash');">Cash</button>
+            <button class="btn btn-xs btn-primary" onclick="WPOS.sales.addPayment('upi');">UPI</button>
             <button class="btn btn-xs btn-primary" onclick="WPOS.sales.addPayment('card');">Card</button>
-            <button class="btn btn-xs btn-primary" onclick="WPOS.sales.addPayment('credit');">Credit</button>
+
+           <!-- <button class="btn btn-xs btn-primary" onclick="WPOS.sales.addPayment('credit');">Credit</button>
             <button class="btn btn-xs btn-primary" onclick="WPOS.sales.addPayment('eftpos');">Eftpos</button>
-            <button class="btn btn-xs btn-primary" onclick="WPOS.sales.addPayment('cheque');">Cheque</button>
+            <button class="btn btn-xs btn-primary" onclick="WPOS.sales.addPayment('cheque');">Cheque</button>-->
             <button style="float: right;" class="btn btn-xs btn-primary" onclick="WPOS.sales.addAdditionalPayment();">Add Payment</button>
         </div>
     </div>

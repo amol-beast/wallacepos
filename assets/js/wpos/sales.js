@@ -144,6 +144,10 @@ function WPOSItems() {
                 }
             }
         }
+        console.log(results);
+        results.sort(function(a, b){
+            return a.price - b.price;
+        });
         //alert(JSON.stringify(results));
         return results;
     };
@@ -229,9 +233,8 @@ function WPOSItems() {
         var disableprice = (sitemid>0 && !(data.isVariablePrice==true));
         var disabletax = (!WPOS.getConfigTable().pos.hasOwnProperty('taxedit') || WPOS.getConfigTable().pos.taxedit=='no');
         var row = $('<tr class="item_row">' +
-            '<td><input class="itemid" type="hidden" value="' + sitemid + '" data-options=\''+JSON.stringify(data)+'\' /><input type="hidden" class="itemdiscountVal" value=""/> <input onChange="WPOS.sales.updateSalesTotal();" style="width:50px;" type="text" class="itemqty numpad" value="' + qty + '" /></td>' +
             '<td><input '+((disable==true && name!="")?"disabled":"")+' style="width: 100%; min-width: 100px;" type="text" class="itemname" value="' + name + '" onChange="WPOS.sales.updateSalesTotal();" /><div class="itemmodtxt"></div></td>' +
-            
+            '<td><input class="itemid" type="hidden" value="' + sitemid + '" data-options=\''+JSON.stringify(data)+'\' /><input type="hidden" class="itemdiscountVal" value=""/> <input onChange="WPOS.sales.updateSalesTotal();" style="width:50px;" type="text" class="itemqty numpad" id="itemqty-'+ data.code +'" value="' + qty + '" /></td>' +
             '<td><input '+((disableprice==true && unit!="")?"disabled":"")+' onChange="WPOS.sales.updateSalesTotal();" style="max-width:50px;" type="text" class="itemunit numpad" value="' + unit + '" /></td>' +
             '<td><button onclick="WPOS.items.openItemModDialog(this);" class="btn btn-primary btn-xs"><i class="icon-list-ul"></i></button><div class="itemmodtext"></div></td>' +
             '<td><input style="max-width:50px;" type="text" class="itemdiscount numpad" value="0.00" onChange="WPOS.sales.updateSalesTotal();" /></td>' +
@@ -246,8 +249,10 @@ function WPOSItems() {
             $("#itemtable").append(row);
         }
         $('#items_contain').scrollTop(1E10);
+        $("#itemqty-"+data.code).trigger('click').focus();
         // reinitialize keypad & field listeners
         WPOS.initKeypad();
+        $("#itemqty-"+data.code).trigger('click').focus();
     }
     this.addItemRow = function(qty, name, unit, taxid, sitemid, data){
         addItemRow(qty, name, unit, taxid, sitemid, data)
@@ -600,6 +605,8 @@ function WPOSItems() {
 // Item UI stuff
 $(function () {
     $.ui.autocomplete.prototype._renderItem = function (ul, item) {
+        console.log(item);
+
         return $("<li>").data("ui-autocomplete-item", item).append("<a>" + (item.email!=undefined?item.email:item.name) + "&nbsp;&nbsp;&nbsp;<b>" +WPOS.util.currencyFormat(item.price) + "</b></a>").appendTo(ul);
     };
 
@@ -699,7 +706,7 @@ $(function () {
 });
 
 function WPOSSales() {
-    var paymentMethods = ['credit', 'cash', 'cheque', 'deposit','card'];
+    var paymentMethods = ['cash', 'upi','card'];
     var cursubtotal = 0.00;
     var curtaxtotal = 0.00;
     var curtotal = 0.00;
@@ -1236,7 +1243,7 @@ function WPOSSales() {
         var payrow =  '<tr '+data+'><td>' +
             '<select class="paymethod" onchange="WPOS.sales.onPaymentMethodChange(this);">' +
             //'<option value="eftpos" '+(method=='eftpos'?'selected':'')+'>Eftpos</option>' +
-            '<option value="credit" '+(method=='credit'?'selected':'')+'>Credit</option>' +
+            '<option value="upi" '+(method=='upi'?'selected':'')+'>UPI</option>' +
             '<option value="cash" '+(method=='cash'?'selected':'')+'>Cash</option>' +
             '<option value="cheque" '+(method=='cheque'?'selected':'')+'>Cheque</option>' +
             '<option value="deposit" '+(method=='deposit'?'selected':'')+'>Deposit</option>' +
@@ -1245,7 +1252,16 @@ function WPOSSales() {
             '<div class="cashvals" '+(method!='cash'?'style="display: none"':'width:150px;')+'>' +
             '<div style="width: 100px; display: inline-block;">Tendered:</div><input onChange="WPOS.sales.updatePaymentChange($(this).parent());" class="paytender numpad" style="width:50px;" type="text" value="'+(method!='cash'?0.00:(tender!=null?tender:value))+'" />' +
             '<div style="width: 100px; display: inline-block;">Change:</div><input class="paychange" style="width:50px;" type="text" value="'+(method!='cash'?0.00:(change!=null?change:0.00))+'" readonly />' +
-            '</div></td>' +
+            '</div>' +
+            '<div class="upivals" '+(method!='upi'?'style="display: none"':'width:150px;')+'>' +
+            '<div style="width: 100px; display: inline-block;">Bank:</div><input name="upi_bank" id="upi_bank" style="width:50px;" type="text" value="ICICI" />' +
+            '<div style="width: 100px; display: inline-block;">TID:</div><input name="upi_tid" id="upi_tid"  style="width:100px;" type="text" />' +
+            '</div>' +
+            '<div class="cardvals" '+(method!='card'?'style="display: none"':'width:150px;')+'>' +
+            '<div style="width: 100px; display: inline-block;">Bank:</div><input name="card_bank" id="card_bank" style="width:50px;" type="text" value="ICICI" />' +
+            '<div style="width: 100px; display: inline-block;">TID:</div><input name="card_tid" id="card_tid"  style="width:100px;" type="text" />' +
+            '</div>' +
+            '</td>' +
             '<td>'+curBefore+'<input onChange="WPOS.sales.updatePaymentSums();" class="payamount numpad" style="width:50px;" type="text" value="'+value+'" autocomplete="off"/>'+curAfter+'</td>' +
             '<td><button class="btn btn-xs btn-danger" onclick="WPOS.sales.removePayment($(this));">X</button></td></tr>';
 
@@ -1629,6 +1645,15 @@ function WPOSSales() {
                 payment.change = parseFloat($(element).find(".paychange").val()).toFixed(2);
 
             }
+            if (payment.method == 'card'){
+                payment.bank = $("#card_bank").val();
+                payment.tid = $("#card_tid").val();
+            }
+            if (payment.method == 'upi'){
+                payment.bank = $("#upi_bank").val();
+                payment.tid = $("#upi_tid").val();
+            }
+
             if ($(element).data('paydata'))
                 payment.paydata = $(element).data('paydata');
             payments.push(payment);
