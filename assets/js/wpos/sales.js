@@ -137,7 +137,7 @@ function WPOSItems() {
                 if (!itemtable.hasOwnProperty(key)) {
                     continue;
                 }
-                if (itemtable[key].name.toUpperCase().indexOf(upquery) != -1) {
+                if (itemtable[key].original_name.toUpperCase().indexOf(upquery) != -1) {
                     results.push(itemtable[key]);
                 } else if (itemtable[key].code.toUpperCase().indexOf(upquery) != -1) {
                     results.push(itemtable[key]);
@@ -605,9 +605,7 @@ function WPOSItems() {
 // Item UI stuff
 $(function () {
     $.ui.autocomplete.prototype._renderItem = function (ul, item) {
-        console.log(item);
-
-        return $("<li>").data("ui-autocomplete-item", item).append("<a>" + (item.email!=undefined?item.email:item.name) + "&nbsp;&nbsp;&nbsp;<b>" +WPOS.util.currencyFormat(item.price) + "</b></a>").appendTo(ul);
+        return $("<li>").data("ui-autocomplete-item", item).append("<a>" + (item.email!=undefined?item.email:item.original_name) + "&nbsp;&nbsp;&nbsp;<b>" +WPOS.util.currencyFormat(item.price) + "</b></a>").appendTo(ul);
     };
 
     $("#itemsearch").autocomplete({
